@@ -1,4 +1,4 @@
-pragma solidity >=0.5.6 < 6.0.0;
+pragma solidity >=0.5.6;
 
 
 /**
@@ -40,11 +40,12 @@ contract Ownable {
    */
   function transferOwnership
   (
-      address newOwner
+    address newOwner
   ) 
   public onlyOwner 
   {
     require(newOwner != address(0));
+    require(newOwner != owner); // preventing redundant ownership transfer
     emit OwnershipTransferred(owner, newOwner);
     owner = newOwner;
   }
