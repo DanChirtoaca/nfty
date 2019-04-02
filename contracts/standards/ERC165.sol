@@ -3,23 +3,24 @@ pragma solidity >=0.5.6;
 
 /**
  * @title ERC165
- * @dev The contract implements ERC165 (see https://eips.ethereum.org/EIPS/eip-165) using a mapping.
+ * @dev The contract implements ERC165 standard (see https://eips.ethereum.org/EIPS/eip-165) using a mapping.
  */
 contract ERC165 {
-    bytes4 public constant _INTERFACE_ID_ERC_165 = bytes4(keccak256('supportsInterface(bytes4)'));
-
     /**
-     * @dev Maps whether an interface ID is supported.
+     * @dev Mapping whether an interface ID is supported.
      */
     mapping(bytes4 => bool) private _supportedInterfaces;
 
+    bytes4 public constant INTERFACE_ID_ERC_165 = bytes4(keccak256('supportsInterface(bytes4)'));
+
+
     /**
-     * @dev The ERC165 constructor registers the implementation of ERC165 itself.
+     * @dev The ERC165 constructor registers the implementation of ERC165 standard itself.
      */
     constructor() 
     internal 
     {
-      _registerInterface(_INTERFACE_ID_ERC_165);
+      _registerInterface(INTERFACE_ID_ERC_165);
     }
 
     /**
