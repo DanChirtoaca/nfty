@@ -3,7 +3,7 @@ pragma solidity >=0.5.6;
 
 import "./ERC721Base.sol";
 
-contract ERC721Mintable is ERC721Base {
+contract ERC721BaseMintable is ERC721Base {
   
   function _mint
   (

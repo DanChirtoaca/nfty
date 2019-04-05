@@ -3,7 +3,7 @@ pragma solidity >=0.5.6;
 
 import "./ERC721Base.sol";
 
-contract ERC721Burnable is ERC721Base {
+contract ERC721BaseBurnable is ERC721Base {
 
   function _burn
   (
