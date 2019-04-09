@@ -25,7 +25,7 @@ contract ERC721BaseMetadata is ERC165Base, ERC721Base, ERC721Metadata {
    */
   mapping(uint256 => string) private _tokenURIs;
 
-  bytes4 private constant _INTERFACE_ID_ERC_721_METADATA = 
+  bytes4 public constant _INTERFACE_ID_ERC_721_METADATA = 
       bytes4(keccak256('name()')) ^
       bytes4(keccak256('symbol()')) ^
       bytes4(keccak256('tokenURI(uint256)'));
