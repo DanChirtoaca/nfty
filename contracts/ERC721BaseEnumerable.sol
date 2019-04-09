@@ -90,7 +90,7 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
   }
 
   /**
-   * Look and add the function overloads that result from this interface (i.e. transfer, minting, etc.)
+   * @notice Look and add the function overrides that result from this interface (i.e. transfer, minting, etc.)
    */
 
 }
