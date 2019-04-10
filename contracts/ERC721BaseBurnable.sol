@@ -11,12 +11,11 @@ contract ERC721BaseBurnable is ERC721Base {
   )
   internal
   {
-    address owner = _tokenOwner[tokenID];
-    require(owner == msg.sender); // probably needs to be handled in modifier to allow costumizability
-    _clearApproval(tokenID);
-    _ownedTokenCount[owner]--;   // decrease balance of current token owner
-    _tokenApproval[tokenID] = address(0);
-  
+    //require(_isApprovedOrOwner(msg.sender, tokenID)); 
+    /**
+     * @notice Above line -> most likely an extension on the basic burning functionality 
+     */
+    _removeToken(tokenID);
     emit Transfer(owner, address(0), tokenID);
   }
 }

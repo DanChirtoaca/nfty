@@ -85,7 +85,7 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
   view 
   returns (uint256) 
   {
-      require(index < balanceOf(owner));
+      require(index < _balanceOf(owner));
       return _ownedTokens[owner][index];
   }
 

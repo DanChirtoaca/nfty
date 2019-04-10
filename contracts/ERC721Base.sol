@@ -14,24 +14,24 @@ contract ERC721Base is ERC721, ERC165Base {
   using Address for address;
 
   /**
-    * @dev Mapping from token ID to owner address.
-    */
-  mapping (uint256 => address) internal _tokenOwner;
+   * @dev Mapping from token ID to owner address.
+   */
+  mapping (uint256 => address) private _tokenOwner;
 
   /**
-    * @dev Mapping from token ID to approved address.
-    */
-  mapping (uint256 => address) internal _tokenApproval;
+   * @dev Mapping from token ID to approved address.
+   */
+  mapping (uint256 => address) private _tokenApproval;
 
   /**
-    * @dev Mapping from token owner address to number of owned tokens.
-    */
-  mapping (address => uint256) internal _ownedTokenCount;
+   * @dev Mapping from token owner address to number of owned tokens.
+   */
+  mapping (address => uint256) private _ownedTokenCount;
 
   /**
-    * @dev Mapping from token owner address to operator(s) approval.
-    */
-  mapping (address => mapping (address => bool)) internal _operatorsApproval;
+   * @dev Mapping from token owner address to operator(s) approval.
+   */
+  mapping (address => mapping (address => bool)) private _operatorsApproval;
 
   bytes4 public constant INTERFACE_ID_ERC_721 = 
       bytes4(keccak256('balanceOf(address)')) ^
@@ -48,24 +48,38 @@ contract ERC721Base is ERC721, ERC165Base {
       bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
 
   /**
-    * @dev The ERC721 constructor registers the implementation of ERC721 standard.
-    */
+   * @dev The ERC721 constructor registers the implementation of ERC721 standard.
+   */
   constructor() 
   public 
   {
-      _registerInterface(INTERFACE_ID_ERC_721);
+    _registerInterface(INTERFACE_ID_ERC_721);
   }
 
   /**
-    * @dev Gives the balance (number of owned tokens) of the specified address.
-    * @param owner Address to query the balance of.
-    * @return uint256 Represents the amount of owned tokens by the queried address.
-    */
+   * @dev Gives the balance (number of owned tokens) of the specified address.
+   * @param owner Address to query the balance of.
+   * @return uint256 Represents the amount of owned tokens by the queried address.
+   */
   function balanceOf
   (
     address owner
   ) 
-  public 
+  external 
+  view 
+  returns (uint256) 
+  {
+    return _balanceOf(owner);
+  }
+
+  /**
+   * @notice Actual implementation of the balanceOf function.
+   */
+  function _balanceOf
+  (
+    address owner
+  ) 
+  internal 
   view 
   returns (uint256) 
   {
@@ -74,15 +88,29 @@ contract ERC721Base is ERC721, ERC165Base {
   }
 
   /**
-    * @dev Gives the owner address of the specified token ID.
-    * @param tokenID ID of the token to query the owner of.
-    * @return address Address marking the current owner of the given token ID.
-    */
+   * @dev Gives the owner address of the specified token ID.
+   * @param tokenID ID of the token to query the owner of.
+   * @return address Address marking the current owner of the given token ID.
+   */
   function ownerOf
   (
     uint256 tokenID
   ) 
-  public
+  external
+  view 
+  returns (address) 
+  {
+    return _ownerOf(tokenID);
+  }
+
+  /**
+   * @notice Actual implementation of the ownerOf function.
+   */
+  function _ownerOf
+  (
+    uint256 tokenID
+  ) 
+  internal
   view 
   returns (address) 
   {
@@ -104,12 +132,25 @@ contract ERC721Base is ERC721, ERC165Base {
     address to, 
     uint256 tokenID
   ) 
-  public
+  external
   payable 
   {
-    address owner = ownerOf(tokenID); 
+    _approve(to, tokenID);
+  }
+
+  /**
+   * @notice Actual implementation of the approve function.
+   */
+  function _approve
+  (
+    address to, 
+    uint256 tokenID
+  ) 
+  internal
+  {
+    address owner = _ownerOf(tokenID); 
     require(to != owner);
-    require(msg.sender == owner || isApprovedForAll(owner, msg.sender));
+    require(msg.sender == owner || _isApprovedForAll(owner, msg.sender));
     _tokenApproval[tokenID] = to;
     emit Approval(owner, to, tokenID);
   }
@@ -124,7 +165,21 @@ contract ERC721Base is ERC721, ERC165Base {
   (
     uint256 tokenID
   ) 
-  public 
+  external 
+  view 
+  returns (address) 
+  {
+    return _getApproved(tokenID);
+  }
+
+  /**
+   * @notice Actual implementation of the getApproved function.
+   */
+  function _getApproved
+  (
+    uint256 tokenID
+  ) 
+  internal 
   view 
   returns (address) 
   {
@@ -143,7 +198,20 @@ contract ERC721Base is ERC721, ERC165Base {
     address to, 
     bool approved
   ) 
-  public 
+  external 
+  {
+    _setApprovalForAll(to, approved);
+  }
+
+  /**
+   * @notice Actual implementation of the setApprovalForAll function.
+   */
+  function _setApprovalForAll
+  (
+    address to, 
+    bool approved
+  ) 
+  internal 
   {
     require(to != msg.sender);
     _operatorsApproval[msg.sender][to] = approved;
@@ -161,7 +229,22 @@ contract ERC721Base is ERC721, ERC165Base {
     address owner, 
     address operator
   ) 
-  public 
+  external 
+  view 
+  returns (bool) 
+  {
+    return _isApprovedForAll(owner, operator);
+  }
+
+  /**
+   * @notice Actual implementation of the isApprovedForAll function.
+   */
+  function _isApprovedForAll
+  (
+    address owner, 
+    address operator
+  ) 
+  internal 
   view 
   returns (bool) 
   {
@@ -189,6 +272,29 @@ contract ERC721Base is ERC721, ERC165Base {
   }
 
   /**
+   * @notice Actual implementation of the transferFrom function.
+   */
+  function _transferFrom
+  (
+    address from, 
+    address to, 
+    uint256 tokenID
+  ) 
+  internal 
+  {
+    require(_isApprovedOrOwner(msg.sender, tokenID));
+    require(_ownerOf(tokenID) == from);
+    require(to != address(0));
+
+    _clearApproval(tokenID);
+    _ownedTokenCount[from]--;   // decrease balance of current token owner
+    _ownedTokenCount[to]++;     // increase balance of target owner
+    _tokenOwner[tokenID] = to;  // assign token ownership to target owner
+
+    emit Transfer(from, to, tokenID);
+  }
+
+  /**
     * @dev Safely transfers the ownership of a given token ID to another address
     * If the target address is a contract, it must implement `onERC721Received`,
     * which is called upon a safe transfer, and return the magic value
@@ -207,12 +313,7 @@ contract ERC721Base is ERC721, ERC165Base {
   external
   payable 
   {
-    _transferFrom(from, to, tokenID);
-    if (to.isContract()) 
-    {
-      bytes4 ack = ERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenID, "");
-      require(ack == INTERFACE_ID_ERC_721_TOKEN_RECEIVER);
-    }
+    _safeTransferFrom(from, to, tokenID, "");
   }
 
   /**
@@ -231,6 +332,21 @@ contract ERC721Base is ERC721, ERC165Base {
   external
   payable 
   {
+    _safeTransferFrom(from, to, tokenID, data);
+  }
+
+ /**
+   * @notice Actual implementation of the safeTransferFrom function.
+   */
+  function _safeTransferFrom
+  (
+    address from, 
+    address to, 
+    uint256 tokenID, 
+    bytes memory data
+  ) 
+  internal
+  {
     _transferFrom(from, to, tokenID);
     if (to.isContract()) 
     {
@@ -238,7 +354,6 @@ contract ERC721Base is ERC721, ERC165Base {
       require(ack == INTERFACE_ID_ERC_721_TOKEN_RECEIVER);
     }
   }
-
 
   /**
     * @dev Returns whether the specified token exists.
@@ -257,33 +372,7 @@ contract ERC721Base is ERC721, ERC165Base {
   }
 
   /**
-    * @dev Transfer ownership of a given token ID to another address.
-    * @param from Current owner of the token.
-    * @param to Address to receive the ownership of the given token ID.
-    * @param tokenID uint256 ID of the token to be transferred.
-    */
-  function _transferFrom
-  (
-    address from, 
-    address to, 
-    uint256 tokenID
-  ) 
-  internal 
-  {
-    require(msg.sender == from || msg.sender == getApproved(tokenID) || isApprovedForAll(from, msg.sender));
-    require(ownerOf(tokenID) == from);
-    require(to != address(0));
-
-    _clearApproval(tokenID);
-    _ownedTokenCount[from]--;   // decrease balance of current token owner
-    _ownedTokenCount[to]++;     // increase balance of target owner
-    _tokenOwner[tokenID] = to;  // assign token ownership to target owner
-
-    emit Transfer(from, to, tokenID);
-  }
-
-  /**
-    * @dev Private function to clear current approval of a given token ID.
+    * @dev Internal function to clear current approval of a given token ID.
     * @param tokenID uint256 ID of the token to clear the approval address for.
     */
   function _clearApproval
@@ -294,7 +383,60 @@ contract ERC721Base is ERC721, ERC165Base {
   {
     if (_tokenApproval[tokenID] != address(0)) 
     {
-        _tokenApproval[tokenID] = address(0);
+      _tokenApproval[tokenID] = address(0);
     }
+  }
+
+  /**
+    * @dev Internal function to add a token (unowned) to an account.
+    * @notice Does not emit any transfer event.
+    */
+  function _addTokenTo
+  (
+    address to,
+    uint256 tokenID
+  )
+  internal
+  {
+    require(!_tokenExists(tokenID));  //  token should not exist yet (i.e. not owned)
+    require(to != address(0));        // target owner should be non-zero address
+    _ownedTokenCount[to]++;           // increase balance of target owner
+    _tokenOwner[tokenID] = to;        // assign token ownership to target owner
+  }
+
+  /**
+    * @dev Internal function to remove a token from the owner's account.
+    * @notice Does not emit any transfer event. Does not check token permissions.
+    */
+  function _removeToken
+  (
+    uint256 tokenID
+  )
+  internal
+  {
+    address owner = _tokenOwner[tokenID];
+    _clearApproval(tokenID);
+    _ownedTokenCount[owner]--;        // decrease balance of current token owner
+    _tokenOwner[tokenID] = address(0);
+  }
+
+  /**
+    * @dev Tells whether the given address can operate a given token ID.
+    * @param user Address of the queried user.
+    * @param tokenID uint256 ID of the queried token.
+    * @return bool Whether the user is approved for the given token ID,
+    * is an operator (isApprovedForAll) for the owner, or is the owner of the token.
+    */
+  function _isApprovedOrOwner
+  (
+    address user, 
+    uint256 tokenID
+    ) 
+    internal 
+    view 
+    returns (bool) 
+    {
+      address owner = _ownerOf(tokenID);
+      return (user == owner || _getApproved(tokenID) == user || _isApprovedForAll(owner, user));
   }
 }
