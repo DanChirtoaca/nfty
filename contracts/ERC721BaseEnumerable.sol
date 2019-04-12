@@ -25,6 +25,11 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
    */
    mapping(address => uint256[]) private _ownedTokens;
 
+  /**
+   * Mapping of the token ID to its index in the owner array of tokens.
+   */
+   mapping(uint256 => uint256) private _ownedTokenIndex;
+
   bytes4 public constant _INTERFACE_ID_ERC_721_ENUMERABLE = 
       bytes4(keccak256('totalSupply()')) ^
       bytes4(keccak256('tokenOfOwnerByIndex(address,uint256)')) ^
@@ -37,7 +42,7 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
   constructor() 
   public 
   {
-      _registerInterface(_INTERFACE_ID_ERC_721_ENUMERABLE);
+    _registerInterface(_INTERFACE_ID_ERC_721_ENUMERABLE);
   }
 
   /**
@@ -85,12 +90,72 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
   view 
   returns (uint256) 
   {
-      require(index < _balanceOf(owner));
-      return _ownedTokens[owner][index];
+    require(index < _balanceOf(owner));
+    return _ownedTokens[owner][index];
   }
 
-  /**
-   * @notice Look and add the function overrides that result from this interface (i.e. transfer, minting, etc.)
-   */
 
+
+  function _transferFrom
+  (
+    address from, 
+    address to, 
+    uint256 tokenId
+  ) 
+  internal 
+  {
+      super._transferFrom(from, to, tokenId);
+      // FINALIZE!!!
+  }
+
+
+
+  /**
+   * @dev Internal function to add a token (unowned) to an account.
+   * @notice Does not emit any transfer event.
+   */
+  function _addTokenTo
+  (
+    address to,
+    uint256 tokenID
+  )
+  internal
+  {
+    super._addTokenTo(to, tokenID);
+    _tokenIDs.push(tokenID);                      // add token to global token array
+    _tokenIndex[tokenID] = _tokenIDs.length - 1;  // added token has last index
+    _ownedTokens[to].push(tokenID);               // add token to owner array of tokens
+    _ownedTokenIndex[tokenID] = _ownedTokens[to].length - 1; // added token has last index in owner array
+  }
+
+  function _removeToken
+  (
+    uint256 tokenID
+  )
+  internal
+  {
+    super._removeToken(tokenID);
+    uint256 tokenIndex = _tokenIndex[tokenID];
+    uint256 lastTokenID = _tokenIDs[_tokenIDs.length - 1];
+    
+    _tokenIDs[tokenIndex] = lastTokenID;   // swap last token with the one to be deleted
+    _tokenIDs.pop();                       // delete last token - duplicate
+
+    _tokenIndex[lastTokenID] = tokenIndex; // update index of previously last token in array
+    //_tokenIndex[tokenID] = 0;              // 0 is wrong since it is the index of another token
+
+    address owner = _ownerOf(tokenID);
+    uint256 tokenIndexInOwner = _ownedTokenIndex[tokenID];
+    uint256 lastTokenIDInOwner = _ownedTokens[owner][_ownedTokens[owner].length - 1];
+
+    _ownedTokens[owner][tokenIndexInOwner] = lastTokenIDInOwner;  // swap last token with the one to be deleted
+    _ownedTokens[owner].pop();                                    // delete last token - duplicate
+
+    _ownedTokenIndex[lastTokenIDInOwner] = tokenIndexInOwner;     // update index of previously last token in array
+    //_ownedTokenIndex[tokenID] = 0;                                 // 0 is wrong since it is the index of another token
+  }
+    /**
+      * @notice Check the issue with the 0 index in array after removal!!!
+      * Look into the gas optimization with the balance counter!!!
+      */
 }
