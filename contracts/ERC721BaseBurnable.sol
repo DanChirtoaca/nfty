@@ -16,6 +16,6 @@ contract ERC721BaseBurnable is ERC721Base {
      * @notice Above line -> most likely an extension on the basic burning functionality 
      */
     _removeToken(tokenID);
-    emit Transfer(owner, address(0), tokenID);
+    emit Transfer(_ownerOf(tokenID), address(0), tokenID);
   }
 }

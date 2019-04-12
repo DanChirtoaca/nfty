@@ -17,6 +17,7 @@ contract ERC721Extended is ERC721Base {
     */
   mapping (uint256 => TokenData) internal _tokenData;
 
+
   function _getTokenData
   (
     uint256 tokenID

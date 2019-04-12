@@ -102,7 +102,20 @@ contract ERC721BaseMetadata is ERC165Base, ERC721Base, ERC721Metadata {
     _tokenURIs[tokenID] = uri;
   }
 
-  /**
-    * @notice Metadata burnable and mintable should be added.    
+ /**
+    * @dev Internal function to delete the token URI (if the uri exists) for a given token.
+    * @param tokenID uint256 ID of the token for which the URI is set.
+    * @param uri string URI to assign.
     */
+  function _deleteTokenURI
+  (
+    uint tokenID
+  )
+  internal
+  {
+    if (bytes(_tokenURIs[tokenID]).length != 0) 
+    {
+      delete _tokenURIs[tokenID];
+    }
+  }
 }
