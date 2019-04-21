@@ -42,11 +42,13 @@ contract Ownable {
   (
     address newOwner
   ) 
-  public onlyOwner 
+  public 
+  onlyOwner 
   {
     require(newOwner != address(0));
     require(newOwner != owner); // preventing redundant ownership transfer
-    emit OwnershipTransferred(owner, newOwner);
+    
     owner = newOwner;
+    emit OwnershipTransferred(owner, newOwner);    
   }
 }
