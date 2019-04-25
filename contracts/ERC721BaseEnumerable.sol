@@ -94,25 +94,25 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
     return _ownedTokens[owner][index];
   }
 
-
-
+ /**
+   * @dev Overrides the implementation of the transferFrom function by adding the enumerable functionality.
+   */
   function _transferFrom
   (
     address from, 
     address to, 
-    uint256 tokenId
+    uint256 tokenID
   ) 
   internal 
   {
-      super._transferFrom(from, to, tokenId);
-      // FINALIZE!!!
+      super._transferFrom(from, to, tokenID);
+      __deleteFromOwnedTokens(tokenID);
+      __insertInOwnedTokens(to, tokenID);
   }
-
-
 
   /**
    * @dev Internal function to add a token (unowned) to an account.
-   * @notice Does not emit any transfer event.
+   * @notice Does not emit any transfer event. Overrides parent implementation.
    */
   function _addTokenTo
   (
@@ -124,10 +124,13 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
     super._addTokenTo(to, tokenID);
     _tokenIDs.push(tokenID);                      // add token to global token array
     _tokenIndex[tokenID] = _tokenIDs.length - 1;  // added token has last index
-    _ownedTokens[to].push(tokenID);               // add token to owner array of tokens
-    _ownedTokenIndex[tokenID] = _ownedTokens[to].length - 1; // added token has last index in owner array
+    __insertInOwnedTokens(to, tokenID);
   }
 
+  /**
+   * @dev Internal function to remove a token completely.
+   * @notice Does not emit any transfer event. Overrides parent implementation.
+   */
   function _removeToken
   (
     uint256 tokenID
@@ -142,8 +145,34 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
     _tokenIDs.pop();                       // delete last token - duplicate
 
     _tokenIndex[lastTokenID] = tokenIndex; // update index of previously last token in array
-    //_tokenIndex[tokenID] = 0;              // 0 is wrong since it is the index of another token
+    _tokenIndex[tokenID] = 0;              // clear the token index
 
+    __deleteFromOwnedTokens(tokenID);
+  }
+
+  /**
+   * @dev Private helper function to insert a token in the owner's enumeration. Performs no checks. 
+   */
+  function __insertInOwnedTokens
+  (
+    address to,
+    uint256 tokenID 
+  )
+  private
+  {
+    _ownedTokens[to].push(tokenID);                          // add token to owner array of tokens
+    _ownedTokenIndex[tokenID] = _ownedTokens[to].length - 1; // added token has last index in owner array
+  }
+
+  /**
+   * @dev Private helper function to delete a token from the owner's enumeration. Performs no checks. 
+   */
+  function __deleteFromOwnedTokens
+  (
+    uint256 tokenID 
+  )
+  private
+  {
     address owner = _ownerOf(tokenID);
     uint256 tokenIndexInOwner = _ownedTokenIndex[tokenID];
     uint256 lastTokenIDInOwner = _ownedTokens[owner][_ownedTokens[owner].length - 1];
@@ -152,10 +181,11 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
     _ownedTokens[owner].pop();                                    // delete last token - duplicate
 
     _ownedTokenIndex[lastTokenIDInOwner] = tokenIndexInOwner;     // update index of previously last token in array
-    //_ownedTokenIndex[tokenID] = 0;                                 // 0 is wrong since it is the index of another token
+    _ownedTokenIndex[tokenID] = 0;                                // clear the token index
   }
-    /**
-      * @notice Check the issue with the 0 index in array after removal!!!
-      * Look into the gas optimization with the balance counter!!!
-      */
+
+  /**
+  * @notice Look into the gas optimization with the balance counter!!!
+  */
+
 }
