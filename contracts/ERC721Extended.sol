@@ -12,6 +12,8 @@ contract ERC721Extended is ERC721Base {
     uint256 hashValue; // barebones example, this can be costumized (i.e. extend the struct)
   }
 
+  TokenData me;
+
   /**
     * @dev Mapping from token ID to token data.
     */
@@ -28,5 +30,6 @@ contract ERC721Extended is ERC721Base {
   {
     require(_tokenExists(tokenID));
     return _tokenData[tokenID];
+
   }
 }
