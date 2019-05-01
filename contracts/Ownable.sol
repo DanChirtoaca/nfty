@@ -28,7 +28,7 @@ contract Ownable {
   /**
    * @dev Throws if called by any account other than the owner.
    */
-  modifier onlyOwner() 
+  modifier onlyContractOwner() 
   {
     require(msg.sender == owner);
     _;
@@ -43,7 +43,7 @@ contract Ownable {
     address newOwner
   ) 
   public 
-  onlyOwner 
+  onlyContractOwner 
   {
     require(newOwner != address(0));
     require(newOwner != owner); // preventing redundant ownership transfer

@@ -1,25 +1,14 @@
 pragma solidity >=0.5.6;
 
 
-import "./ERC721Base.sol";
 import "./interfaces/ERC721Enumerable.sol";
-import "./ERC165Base.sol";
+import "./ERC721BaseTokenSupply.sol";
 
 /**
 * @title ERC-721 Non-Fungible Token with enumeration extension logic.
 * @dev See https://eips.ethereum.org/EIPS/eip-721.
 */
-contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
-  /**
-   * Array storing all the token IDs.
-   */
-   uint256[] private _tokenIDs;
-
-  /**
-  * Mapping of the token ID to its index in the array of all token IDs (_tokenIDs).
-  */
-  mapping(uint256 => uint256) private _tokenIndex;
-
+contract ERC721BaseEnumerable is ERC721BaseTokenSupply, ERC721Enumerable {
   /**
    * Mapping of the owner to their list of owned token IDs.
    */
@@ -50,11 +39,11 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
    * @return uint256 Represents the total amount of tokens.
    */
   function totalSupply() 
-  public 
+  external 
   view 
   returns (uint256) 
   {
-    return _tokenIDs.length;
+    return _totalSupply();
   }
   
   /**
@@ -67,12 +56,11 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
   (
     uint256 index
   ) 
-  public 
+  external 
   view 
   returns (uint256) 
   {
-    require(index < totalSupply());
-    return _tokenIDs[index];
+    return _tokenByIndex(index);
   }
 
   /**
@@ -86,12 +74,27 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
     address owner, 
     uint256 index
   ) 
-  public 
+  external 
   view 
   returns (uint256) 
   {
     require(index < _balanceOf(owner));
     return _ownedTokens[owner][index];
+  }
+
+  /**
+   * @notice Overriden implementation of the balanceOf function (gas optimization - double storage).
+   */
+  function _balanceOf
+  (
+    address owner
+  ) 
+  internal 
+  view 
+  returns (uint256) 
+  {
+    require(owner != address(0));
+    return _ownedTokens[owner].length;
   }
 
  /**
@@ -122,8 +125,6 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
   internal
   {
     super._addTokenTo(to, tokenID);
-    _tokenIDs.push(tokenID);                      // add token to global token array
-    _tokenIndex[tokenID] = _tokenIDs.length - 1;  // added token has last index
     __insertInOwnedTokens(to, tokenID);
   }
 
@@ -138,15 +139,6 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
   internal
   {
     super._removeToken(tokenID);
-    uint256 tokenIndex = _tokenIndex[tokenID];
-    uint256 lastTokenID = _tokenIDs[_tokenIDs.length - 1];
-    
-    _tokenIDs[tokenIndex] = lastTokenID;   // swap last token with the one to be deleted
-    _tokenIDs.pop();                       // delete last token - duplicate
-
-    _tokenIndex[lastTokenID] = tokenIndex; // update index of previously last token in array
-    _tokenIndex[tokenID] = 0;              // clear the token index
-
     __deleteFromOwnedTokens(tokenID);
   }
 
@@ -183,9 +175,4 @@ contract ERC721BaseEnumerable is ERC165Base, ERC721Base, ERC721Enumerable {
     _ownedTokenIndex[lastTokenIDInOwner] = tokenIndexInOwner;     // update index of previously last token in array
     _ownedTokenIndex[tokenID] = 0;                                // clear the token index
   }
-
-  /**
-  * @notice Look into the gas optimization with the balance counter!!!
-  */
-
 }

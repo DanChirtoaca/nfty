@@ -48,7 +48,7 @@ contract Administered is Ownable {
     address admin
   )
   public
-  onlyOwner
+  onlyContractOwner
   {
     _adminApproval[admin] = true;
     emit AdminRegistered(admin);

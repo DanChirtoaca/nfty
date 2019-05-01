@@ -2,9 +2,9 @@ pragma solidity >=0.5.6;
 
 
 import "./ERC721BaseMintable.sol";
-import "./ERC721BaseEnumerable.sol";
+import "./ERC721BaseTokenSupply.sol";
 
-contract ERC721BaseMintableLimited is ERC721BaseMintable, ERC721BaseEnumerable {
+contract ERC721BaseMintableLimited is ERC721BaseMintable, ERC721BaseTokenSupply {
   uint256 public maxSupply;
 
 
@@ -28,12 +28,7 @@ contract ERC721BaseMintableLimited is ERC721BaseMintable, ERC721BaseEnumerable {
   )
   internal
   {
-    require(totalSupply() < maxSupply);
+    require(_totalSupply() < maxSupply);
     super._mint(to, tokenID);
   }
-
-  /**
-   * @notice Ensure inheritance tree with mintable and enumerable has no collisions.
-   */
-
 }

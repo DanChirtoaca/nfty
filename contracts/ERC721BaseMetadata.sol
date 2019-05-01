@@ -3,13 +3,12 @@ pragma solidity >=0.5.6;
 
 import "./ERC721Base.sol";
 import "./interfaces/ERC721Metadata.sol";
-import "./ERC165Base.sol";
 
 /**
 * @title ERC-721 Non-Fungible Token with metadata extension logic.
 * @dev See https://eips.ethereum.org/EIPS/eip-721.
 */
-contract ERC721BaseMetadata is ERC165Base, ERC721Base, ERC721Metadata {
+contract ERC721BaseMetadata is ERC721Base, ERC721Metadata {
   /**
    * Token name.
    */
@@ -23,7 +22,7 @@ contract ERC721BaseMetadata is ERC165Base, ERC721Base, ERC721Metadata {
   /**
    * Mapping of token URIs.
    */
-  mapping(uint256 => string) private _tokenURIs;
+  mapping(uint256 => string) private _tokenURI;
 
   bytes4 public constant _INTERFACE_ID_ERC_721_METADATA = 
       bytes4(keccak256('name()')) ^
@@ -82,12 +81,40 @@ contract ERC721BaseMetadata is ERC165Base, ERC721Base, ERC721Metadata {
   returns (string memory) 
   {
     require(_tokenExists(tokenID));
-    return _tokenURIs[tokenID];
+    return _tokenURI[tokenID];
   }
 
   /**
+    * @dev External function to set a token URI. Can be called once per tokenID.
+    */
+  function setTokenURI
+  (
+    uint256 tokenID,
+    string calldata uri
+  ) 
+  external 
+  {
+    _setTokenURI(tokenID, uri);
+  }
+
+  /**
+    * @dev Internal function to remove a token from the owner's account. Override parent implementation.
+    * @notice Does not emit any transfer event. Does not check token permissions.
+    */
+  function _removeToken
+  (
+    uint256 tokenID
+   )
+   internal
+   {
+     super._removeToken(tokenID);
+     _deleteTokenURI(tokenID);
+   }
+
+  /**
     * @dev Internal function to set the token URI for a given token.
-    * Throws if the token ID does not exist.
+    * Throws if: given uri is empty, or the token ID does not exist, or
+    * the uri for given token is already set.
     * @param tokenID uint256 ID of the token for which the URI is set.
     * @param uri string URI to assign.
     */
@@ -98,8 +125,10 @@ contract ERC721BaseMetadata is ERC165Base, ERC721Base, ERC721Metadata {
   ) 
   internal 
   {
+    require(bytes(uri).length != 0);  // supplied uri should not be empty
     require(_tokenExists(tokenID));
-    _tokenURIs[tokenID] = uri;
+    require(bytes(_tokenURI[tokenID]).length == 0); // tokenID should not be already set
+    _tokenURI[tokenID] = uri;
   }
 
  /**
@@ -113,9 +142,9 @@ contract ERC721BaseMetadata is ERC165Base, ERC721Base, ERC721Metadata {
   )
   internal
   {
-    if (bytes(_tokenURIs[tokenID]).length != 0) 
+    if (bytes(_tokenURI[tokenID]).length != 0) 
     {
-      delete _tokenURIs[tokenID];
+      delete _tokenURI[tokenID];
     }
   }
 }
