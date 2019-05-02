@@ -104,12 +104,12 @@ contract ERC721BaseMetadata is ERC721Base, ERC721Metadata {
   function _removeToken
   (
     uint256 tokenID
-   )
-   internal
-   {
-     super._removeToken(tokenID);
-     _deleteTokenURI(tokenID);
-   }
+  )
+  internal
+  {
+    super._removeToken(tokenID);
+    _deleteTokenURI(tokenID);
+  }
 
   /**
     * @dev Internal function to set the token URI for a given token.

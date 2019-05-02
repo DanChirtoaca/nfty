@@ -9,26 +9,82 @@ import "./ERC721Base.sol";
 contract ERC721Extended is ERC721Base {
   struct TokenData
   {
-    uint256 hashValue; // barebones example, this can be costumized (i.e. extend the struct)
+    uint256 hashValue; // barebones example, this is to be costumized (i.e. define own struct)
   }
-
 
   /**
     * @dev Mapping from token ID to token data.
     */
   mapping (uint256 => TokenData) internal _tokenData;
 
+  /**
+    * @dev Mapping from token ID to bool determining whether the token data was set.
+    */
+  mapping (uint256 => bool) private _hasTokenData;
 
-  function _getTokenData
+
+  /**
+   * @dev Exernal function that allows to set the token data for a token. 
+   * This is a one time setter.
+   * @notice This is a Mock function. Has to be extended with the eventual fields of the struct
+   */
+  function setTokenData
+  (
+    uint256 tokenID
+    // struct fields should be added as arguments
+  )
+  external
+  {
+  TokenData memory tokenData = TokenData(0); // use provided arguments of the struct
+    _setTokenData(tokenID, tokenData);
+  }
+
+  /**
+   * @dev Mock function to return token data for given tokenID. Should return all fields in the
+   * defined TokenData struct
+   */
+  function getTokenData
+  (
+    uint256 tokenID
+  )
+  external
+  view
+  returns (uint256,bool)
+  {
+    require(_tokenExists(tokenID));
+    require(_hasTokenData[tokenID]);
+
+    return (0, true);
+  }
+
+  /**
+    * @dev Internal function to remove a token from the owner's account. Override parent implementation.
+    * @notice Does not emit any transfer event. Does not check token permissions.
+    */
+  function _removeToken
   (
     uint256 tokenID
   )
   internal
-  view
-  returns (TokenData memory)
   {
-    require(_tokenExists(tokenID));
-    return _tokenData[tokenID];
+    super._removeToken(tokenID);
+    delete _tokenData[tokenID];
+  }
 
+  /**
+    * @dev Internal function to set the token data struct for a token.
+    * @notice Does not check token permissions. Can be called once per token.
+    */
+  function _setTokenData
+  (
+    uint256 tokenID,
+    TokenData memory tokenData
+  )
+  internal
+  {
+    require(_tokenExists(tokenID)); 
+    require(!_hasTokenData[tokenID]);
+    _tokenData[tokenID] = tokenData;
+    _hasTokenData[tokenID] = true;
   }
 }
