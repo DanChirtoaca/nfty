@@ -1,0 +1,61 @@
+NFTContract:
+    (Derive)?
+    (Include)?
+    (Limit)?
+    (Extend)?
+    (Modifiers)?
+;
+
+Derive:
+    'derive'
+        derived+=DeriveFeature
+;
+
+Include:
+    'include'
+        included+=IncludeFeature
+;
+
+Limit:
+    'limit' 'to' limit=INT
+;
+
+Extend:
+    'extend' 'with' fields*=Field[',']
+;
+
+Modifiers:
+    modifiers*=Modifier
+;
+
+Modifier:
+    'modify' FunctionName 'with' ModifierName
+;
+
+DeriveFeature:
+    'owner' | 'admin' | 'pause'
+;
+
+IncludeFeature:
+    Meta | 'mint' | 'burn' | 'enum' | 'auction'
+;
+
+Meta:
+    'meta(' name=STRING ',' symbol=STRING ')'
+;
+
+Field:
+    type=SolidityType name=STRING
+;
+
+SolidityType:
+    'uint256' | 'address'
+;
+
+FunctionName:
+    ID
+;
+
+ModifierName:
+    ID
+;
