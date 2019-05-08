@@ -24,7 +24,7 @@ contract ERC721Extended is ERC721Base {
 
 
   /**
-   * @dev Exernal function that allows to set the token data for a token. 
+   * @dev Exernal function that allows to set the token data for a token.
    * This is a one time setter.
    * @notice This is a Mock function. Has to be extended with the eventual fields of the struct
    */
@@ -51,16 +51,17 @@ contract ERC721Extended is ERC721Base {
   view
   returns (uint256,bool)
   {
-    require(_tokenExists(tokenID));
-    require(_hasTokenData[tokenID]);
+    require(_tokenExists(tokenID), "Token does not exist.");
+    require(_hasTokenData[tokenID], "Token has no token data.");
 
-    return (0, true);
+    TokenData memory tokenData = _tokenData[tokenID];
+    return (0, true); // should return a tuple containing the fields of the struct
   }
 
   /**
-    * @dev Internal function to remove a token from the owner's account. Override parent implementation.
-    * @notice Does not emit any transfer event. Does not check token permissions.
-    */
+   * @dev Internal function to remove a token from the owner's account. Override parent implementation.
+   * @notice Does not emit any transfer event. Does not check token permissions.
+   */
   function _removeToken
   (
     uint256 tokenID
@@ -72,9 +73,9 @@ contract ERC721Extended is ERC721Base {
   }
 
   /**
-    * @dev Internal function to set the token data struct for a token.
-    * @notice Does not check token permissions. Can be called once per token.
-    */
+   * @dev Internal function to set the token data struct for a token.
+   * @notice Does not check token permissions. Can be called once per token.
+   */
   function _setTokenData
   (
     uint256 tokenID,
@@ -82,9 +83,9 @@ contract ERC721Extended is ERC721Base {
   )
   internal
   {
-    require(_tokenExists(tokenID)); 
-    require(!_hasTokenData[tokenID]);
-    _tokenData[tokenID] = tokenData;
+    require(_tokenExists(tokenID), "Token does not exist.");
+    require(!_hasTokenData[tokenID], "Token already has token data.");
     _hasTokenData[tokenID] = true;
+    _tokenData[tokenID] = tokenData;
   }
 }
