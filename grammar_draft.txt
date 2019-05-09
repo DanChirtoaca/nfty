@@ -1,0 +1,40 @@
+## grammar draft
+
+include mint, burn, meta(name, symbol), enum, auction, owner, admin, pause.  ## contract features.
+limit to uint256. ## specifies nr of max allowed tokens
+extend with uint256 hash, address referal, bool mandatory. ##used to add token data
+
+modify balanceOf with onlyTokenOwner.
+modify mint with onlyMinter.
+
+
+## list of external and public functions which can be modified:
+
+## balanceOf
+## ownerOf
+## approve
+## getApproved
+## setApprovalForAll
+## isApprovedForAll
+## mint                -- available only with mint 
+## burn                -- available only with burn
+## totalSupply         -- available only with enumeration
+## tokenByIndex        -- available only with enumeration
+## tokenOfOwnerByIndex -- available only with enumeration
+## name          -- available only with metadata 
+## symbol        -- available only with metadata
+## tokenURI      -- available only with metadata
+## getTokenData  -- available only upon extend
+
+## list of available modifiers for the above functions:
+
+## onlyTokenOwner
+## onlyTokenOwnerOrApproved
+## onlyContractOwner
+## onlyAdmin
+## onlyMinter
+## onlyBurner
+
+
+
+

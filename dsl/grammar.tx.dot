@@ -11,64 +11,61 @@
     edge[dir=black,arrowtail=empty]
 
 
-27156600[ label="{*NFTContract|Derive\? Include\? Limit\? Extend\? Modifiers\?}"]
-27156600 -> 27139992 [dir=back]
-27156600 -> 25123336 [dir=back]
-27156600 -> 25128280 [dir=back]
-27156600 -> 27403800 [dir=back]
-27156600 -> 27408744 [dir=back]
+18407992[ label="{*Contract|Derive\? Include\? Extend\? Modifiers\?}"]
+18407992 -> 18391384 [dir=back]
+18407992 -> 16374360 [dir=back]
+18407992 -> 16379304 [dir=back]
+18407992 -> 18652600 [dir=back]
 
-27139992[ label="{Derive|+derived:list[DeriveFeature]\l}"]
+18391384[ label="{Derive|+derived:list[ID]\l}"]
 
-25123336 -> 27145528[arrowtail=diamond, dir=both, headlabel="included 1..*"]
-25123336[ label="{Include|}"]
+16374360 -> 18655544[arrowtail=diamond, dir=both, headlabel="included 1..*"]
+16374360[ label="{Include|}"]
 
-25128280[ label="{Limit|+limit:INT\l}"]
+16379304 -> 18665432[arrowtail=diamond, dir=both, headlabel="fields 1..*"]
+16379304[ label="{Extend|}"]
 
-27403800 -> 27420808[arrowtail=diamond, dir=both, headlabel="fields 0..*"]
-27403800[ label="{Extend|}"]
+18652600 -> 18657544[arrowtail=diamond, dir=both, headlabel="modifiers 0..*"]
+18652600[ label="{Modifiers|}"]
 
-27408744[ label="{Modifiers|modifiers:list[Modifier]\l}"]
+18657544[ label="{Modifier|+function:ID\l+modifier:ID\l}"]
 
-27413688[ label="{Modifier|modify ID with ID}"]
+18655544[ label="{*Feature|ID}"]
+18655544 -> 16373304 [dir=back]
+18655544 -> 16372360 [dir=back]
 
-27401800[ label="{DeriveFeature|owner\|admin\|pause}"]
+16372360[ label="{Mint|+limit:INT\l}"]
 
-27145528[ label="{*IncludeFeature|mint\|burn\|enum\|auction}"]
-27145528 -> 25122280 [dir=back]
+16373304[ label="{Meta|+token_name:STRING\l+token_symbol:STRING\l}"]
 
-25122280[ label="{Meta|+name:STRING\l+symbol:STRING\l}"]
+18665432[ label="{Field|+type:SolidityType\l+var_name:ID\l}"]
 
-27420808[ label="{Field|+type:SolidityType\l+name:STRING\l}"]
+18671496[ label="{SolidityType|uint\|uint256\|address\|bool}"]
 
-27425752[ label="{SolidityType|uint256\|address}"]
+18676440[ label="{Comment|\\/\\/.*$}"]
 
-27430696[ label="{FunctionName|ID}"]
+18388440[ label="{ID|}"]
 
-27435640[ label="{ModifierName|ID}"]
+18393384[ label="{STRING|}"]
 
-27137048[ label="{ID|}"]
+18398920[ label="{BOOL|}"]
 
-27141992[ label="{STRING|}"]
+18404456[ label="{INT|}"]
 
-27147528[ label="{BOOL|}"]
+18409992[ label="{FLOAT|}"]
 
-27153064[ label="{INT|}"]
+18415528[ label="{NUMBER|}"]
+18415528 -> 18409992 [dir=back]
+18415528 -> 18404456 [dir=back]
 
-27158600[ label="{FLOAT|}"]
+18421064[ label="{BASETYPE|}"]
+18421064 -> 18415528 [dir=back]
+18421064 -> 18398920 [dir=back]
+18421064 -> 18388440 [dir=back]
+18421064 -> 18393384 [dir=back]
 
-27164136[ label="{NUMBER|}"]
-27164136 -> 27158600 [dir=back]
-27164136 -> 27153064 [dir=back]
-
-27169672[ label="{BASETYPE|}"]
-27169672 -> 27164136 [dir=back]
-27169672 -> 27147528 [dir=back]
-27169672 -> 27137048 [dir=back]
-27169672 -> 27141992 [dir=back]
-
-27175800[ label="{*OBJECT|}"]
-27175800 -> 27169672 [dir=back]
+18427192[ label="{*OBJECT|}"]
+18427192 -> 18421064 [dir=back]
 
 
 }

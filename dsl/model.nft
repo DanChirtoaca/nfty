@@ -1,0 +1,9 @@
+//derive owner, pause
+
+include meta ('Tokies', 'TK'), enum, mint(2000), burn
+
+extend with address seller, bool active
+
+modify transferTo with onlyContractOwner
+modify balanceOf with onlyTokenOwner
+
