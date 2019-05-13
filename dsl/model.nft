@@ -1,9 +1,32 @@
-//derive owner, pause
+// this is a comment
+// every line of code in this dsl is optional -> 
+// the minimum possible program is an empty file ->
+// yielding only the base implementation of the ERC721 standard.
 
-include meta ('Tokies', 'TK'), enum, mint(2000), burn
+derive owner, admin, minter, burner, pause // allows to add one or more access control features (5 available)
+                                           // these features are separated from the rest
+                                           // as they are to be inherited by the base contract ERC721
+                                           // such that their features are available down the inheritance tree
+                                           // owner - provides the ownership transfer functionality + onlyContractOwner modifier
+                                           // admin - provides a data structure for managing a list of admins + onlyAdmin modifier
+                                           // minter - for managing a list of minters + onlyMinter modifier
+                                           // burner - for managing a list of burners + onlyBurner modifier
+                                           // pause - adds the pausability feature by appending the whenNotPaused modifier to state changing functions
 
-extend with address seller, bool active
+include meta ('Tokies', 'TK'), enum, mint(2000), burn, auction // allows to add one or more contract extension features (5 available)
+                                                               // meta - metadata extension - parameters are optional (name and symbol for tokens)
+                                                               // enum - enumeration extension
+                                                               // mint - minting extension - parameter is optional (sets a minting limit)
+                                                               // burn - burning extension
+                                                               // auction - auctioning extension - allows to create auctions for owned tokens and 
+                                                               // sell them by accepting bids
 
-modify transferTo with onlyContractOwner
-modify balanceOf with onlyTokenOwner
+extend with address seller, bool active // allows to extend the contract with additional token data
+                                        // the fields are added to a struct, which gets mapped to the corresponding token ID
+                                        // only basic types are supported (i.e. no mappings or arrays)
+
+modify transferTo with onlyContractOwner // allows to modify an external or public function with one of the available modifiers
+modify balanceOf with onlyTokenOwner     // modifiers: onlyContractOwner, onlyTokenOwner, onlyTokenOwnerOrApproved, onlyAdmin, onlyMinter, onlyBurner
+                                         // the available modifiers depend on the derived acces control features (line 6)
+                                         // a function can have at most one 'only' modifier 
 

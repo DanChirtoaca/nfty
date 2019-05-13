@@ -1,8 +1,8 @@
 Contract:
-    (Derive)?
-    (Include)?
-    (Extend)?
-    (Modifiers)?
+    (derives=Derive)?
+    (inlcudes=Include)?
+    (extends=Extend)?
+    modifiers*=Modifier
 ;
 
 Derive:
@@ -15,10 +15,6 @@ Include:
 
 Extend:
     'extend' 'with' fields+=Field[',']
-;
-
-Modifiers:
-    modifiers*=Modifier
 ;
 
 Modifier:
@@ -42,7 +38,7 @@ Field:
 ;
 
 SolidityType:
-    'uint' | 'uint256' | 'address' | 'bool'
+    'uint' | 'uint256' | 'address' | 'bool' | 'string'
 ;
 
 Comment:
