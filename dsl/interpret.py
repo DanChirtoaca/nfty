@@ -13,5 +13,6 @@ from mako.template import Template
 mytemplate = Template(filename='template.sol', strict_undefined=True)
 data={}
 
-data['name'] = "Andrew"
+data['imports'] = ["./File1.sol", "./File2.sol", "./File3.sol"]
+data['extensions'] = ["File1", "File2", "File3"]
 print(mytemplate.render(data=data))
