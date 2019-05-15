@@ -5,14 +5,15 @@ import "./ERC721Base.sol";
 
 /**
  * @title ERC721BaseBuyable - extension to the basic ERC721 that adds ability to
- * create/cancel auctions on tokens, add/remove bids, and withdraw funds from lost bids
+ * create/cancel timed auctions on tokens, add/remove bids, and withdraw funds from lost bids
  * as well as funds from completing an auction.
  */
 contract ERC721BaseBuyable is ERC721Base {
   event TokenOnAuction
   (
     uint256 tokenID,
-    uint256 startingPrice
+    uint256 startingPrice,
+    uint256 duration
   );
 
   event TokenOffAuction
@@ -44,14 +45,15 @@ contract ERC721BaseBuyable is ERC721Base {
 
   struct Auction
   {
-    uint256 price;          // in wei
-    bool isForSale;
+    uint128 price;          // in wei
+    uint64 startTime;
+    uint64 duration;
   }
 
   struct Bid
   {
     address bidder;
-    uint256 value;
+    uint128 value;
   }
   /**
    * Mapping of tokenIDs to their auction. A token can have at most one open auction on it.
@@ -79,16 +81,18 @@ contract ERC721BaseBuyable is ERC721Base {
   function createAuction
   (
     uint256 tokenID,
-    uint128 price
+    uint128 price,
+    uint64 duration
   )
   external
   onlyTokenOwnerOrApproved(tokenID)
   {
     require(!_isOnAuction(tokenID), "Token already has an open auction.");
-    Auction memory auction = Auction(price, true);
+    require(duration > 1 minutes, "Auction duration should be greater than 1 minute");
+    Auction memory auction = Auction(price, uint64(now), duration);
     _tokenAuction[tokenID] = auction;
 
-    emit TokenOnAuction(tokenID, price);
+    emit TokenOnAuction(tokenID, price, duration);
   }
 
   /**
@@ -130,7 +134,8 @@ contract ERC721BaseBuyable is ERC721Base {
   }
 
   /**
-   * @dev Actual implementation of the isOnAuction function.
+   * @dev Actual implementation of the isOnAuction function. Uses auction startTime to check
+   * whether token is on auction as auction startTime cannot be 0.
    */
   function _isOnAuction
   (
@@ -140,7 +145,8 @@ contract ERC721BaseBuyable is ERC721Base {
   view
   returns (bool)
   {
-    return _tokenAuction[tokenID].isForSale;
+    require(_tokenAuction[tokenID].startTime > 0, "Token is not on auction.");
+    return _tokenAuction[tokenID].startTime + _tokenAuction[tokenID].duration < uint64(now);
   }
 
   /**
@@ -179,8 +185,8 @@ contract ERC721BaseBuyable is ERC721Base {
     Bid memory currentBid = _tokenBid[tokenID];
     require(msg.value > currentBid.value, "New bid must exceed current highest bid value.");
 
-    _pendingWithdrawal[currentBid.bidder] += currentBid.value;   //add refund to the current highest bidder
-    _tokenBid[tokenID] = Bid(msg.sender, msg.value);             // update the highest bid with the new one
+    _pendingWithdrawal[currentBid.bidder] += currentBid.value;    //add refund to the current highest bidder
+    _tokenBid[tokenID] = Bid(msg.sender, uint128(msg.value));     // update the highest bid with the new one
 
     emit TokenBidEntered(tokenID, msg.value, msg.sender);
   }

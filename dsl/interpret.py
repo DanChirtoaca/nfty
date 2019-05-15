@@ -10,5 +10,8 @@ print (nft_model)
 """
 from mako.template import Template
 
-mytemplate = Template(filename='model.nft')
-print(mytemplate.render())
+mytemplate = Template(filename='template.sol', strict_undefined=True)
+data={}
+
+data['name'] = "Andrew"
+print(mytemplate.render(data=data))
