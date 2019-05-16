@@ -1,3 +1,9 @@
+<%!
+  from dsl_util import put
+%>
+<%
+  pause = put(data, 'pausable')
+%>
 pragma solidity >=0.5.6;
 
 
@@ -86,6 +92,7 @@ contract ERC721BaseBuyable is ERC721Base {
   )
   external
   onlyTokenOwnerOrApproved(tokenID)
+  ${pause}
   {
     require(!_isOnAuction(tokenID), "Token already has an open auction.");
     require(duration > 1 minutes, "Auction duration should be greater than 1 minute");
@@ -105,6 +112,7 @@ contract ERC721BaseBuyable is ERC721Base {
   )
   external
   onlyTokenOwnerOrApproved(tokenID)
+  ${pause}
   {
     delete _tokenAuction[tokenID];
 
@@ -177,6 +185,7 @@ contract ERC721BaseBuyable is ERC721Base {
   )
   external
   payable
+  ${pause}
   {
     Auction memory auction = _tokenAuction[tokenID];
     require(_isOnAuction(tokenID), "Token is not on auction.");
@@ -203,6 +212,7 @@ contract ERC721BaseBuyable is ERC721Base {
   )
   external
   onlyTokenOwnerOrApproved(tokenID)
+  ${pause}
   {
     uint256 amount = _tokenBid[tokenID].value;
     address bidder = _tokenBid[tokenID].bidder;
@@ -226,6 +236,7 @@ contract ERC721BaseBuyable is ERC721Base {
     uint256 tokenID
   )
   external
+  ${pause}
   {
     Bid memory currentBid = _tokenBid[tokenID];
     require(currentBid.bidder == msg.sender, "Current highest bid belongs to another bidder.");
@@ -245,6 +256,7 @@ contract ERC721BaseBuyable is ERC721Base {
    */
   function withdraw()
   external
+  ${pause}
   {
     uint amount = _pendingWithdrawal[msg.sender];
     require(amount > 0, "No funds available for withdrawal.");

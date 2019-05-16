@@ -1,3 +1,9 @@
+<%!
+  from dsl_util import put, modify
+%>
+<%
+  pause = put(data, 'pausable')
+%>
 pragma solidity >=0.5.6;
 
 
@@ -51,6 +57,7 @@ contract ERC721BaseMetadata is ERC721Base, ERC721Metadata {
   function name()
   external
   view
+  ${modify(data, "name")}
   returns (string memory)
   {
     return _name;
@@ -62,6 +69,7 @@ contract ERC721BaseMetadata is ERC721Base, ERC721Metadata {
   function symbol()
   external
   view
+  ${modify(data, "symbol")}
   returns (string memory)
   {
     return _symbol;
@@ -78,6 +86,7 @@ contract ERC721BaseMetadata is ERC721Base, ERC721Metadata {
   )
   external
   view
+  ${modify(data, "tokenURI")}
   returns (string memory)
   {
     require(_tokenExists(tokenID), "Token does not exist.");
@@ -93,6 +102,8 @@ contract ERC721BaseMetadata is ERC721Base, ERC721Metadata {
     string calldata uri
   )
   external
+  ${modify(data, "setTokenURI")}
+  ${pause}
   {
     _setTokenURI(tokenID, uri);
   }

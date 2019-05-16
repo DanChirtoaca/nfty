@@ -1,3 +1,9 @@
+<%!
+  from dsl_util import put, modify
+%>
+<%
+  pause = put(data, 'pausable')
+%>
 pragma solidity >=0.5.6;
 
 
@@ -27,6 +33,8 @@ contract ERC721BaseMintable is ERC721Base {
     uint256 tokenID
   )
   external
+  ${modify(data, "burn")}
+  ${pause}
   {
     _mint(to, tokenID);
   }

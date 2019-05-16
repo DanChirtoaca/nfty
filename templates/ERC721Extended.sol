@@ -1,3 +1,10 @@
+<%!
+  from dsl_util import put, modify
+%>
+<%
+
+  pause = put(data, 'pausable')
+%>
 pragma solidity >=0.5.6;
 
 
@@ -9,7 +16,7 @@ import "./ERC721Base.sol";
 contract ERC721Extended is ERC721Base {
   struct TokenData
   {
-    uint256 hashValue; // barebones example, this is to be costumized (i.e. define own struct)
+    ${token_struct_data}
   }
 
   /**
@@ -30,12 +37,14 @@ contract ERC721Extended is ERC721Base {
    */
   function setTokenData
   (
-    uint256 tokenID
-    // struct fields should be added as arguments
+    uint256 tokenID,
+    ${token_setter_data}
   )
   external
+  ${modify(data, "setTokenData")}
+  ${pause}
   {
-  TokenData memory tokenData = TokenData(0); // use provided arguments of the struct
+  TokenData memory tokenData = TokenData(${token_constructor_data}); // use provided arguments of the struct
     _setTokenData(tokenID, tokenData);
   }
 
@@ -49,6 +58,7 @@ contract ERC721Extended is ERC721Base {
   )
   external
   view
+  ${modify(data, "getTokenData")}
   returns (uint256,bool)
   {
     require(_tokenExists(tokenID), "Token does not exist.");

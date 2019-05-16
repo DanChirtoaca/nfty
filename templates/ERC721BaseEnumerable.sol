@@ -1,3 +1,7 @@
+<%!
+  from dsl_util import modify
+%>
+
 pragma solidity >=0.5.6;
 
 
@@ -41,6 +45,7 @@ contract ERC721BaseEnumerable is ERC721BaseTokenSupply, ERC721Enumerable {
   function totalSupply()
   external
   view
+  ${modify(data, "totalSupply")}
   returns (uint256)
   {
     return _totalSupply();
@@ -58,6 +63,7 @@ contract ERC721BaseEnumerable is ERC721BaseTokenSupply, ERC721Enumerable {
   )
   external
   view
+  ${modify(data, "tokenByIndex")}
   returns (uint256)
   {
     return _tokenByIndex(index);
@@ -76,6 +82,7 @@ contract ERC721BaseEnumerable is ERC721BaseTokenSupply, ERC721Enumerable {
   )
   external
   view
+  ${modify(data, "tokenOfOwnerByIndex")}
   returns (uint256)
   {
     require(index < _balanceOf(owner), "Index out of bounds.");

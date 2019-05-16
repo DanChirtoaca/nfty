@@ -11,7 +11,7 @@ contract ERC721BaseTokenSupply is ERC721Base {
    * Array storing all the token IDs.
    */
    uint256[] private _tokenIDs;
-  
+
   /**
   * Mapping of the token ID to its index in the array of all token IDs (_tokenIDs).
   */

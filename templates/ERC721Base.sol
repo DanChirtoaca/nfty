@@ -1,3 +1,12 @@
+<%!
+  from dsl_util import put, modify, getImports, getExtensions    
+%>
+<%
+  imports = getImports(data)
+  extensions = ", " + getExtenstions(data)
+  pause = put(data, 'pausable')
+%>
+
 pragma solidity >=0.5.6;
 
 
@@ -5,12 +14,13 @@ import "./ERC165Base.sol";
 import "./interfaces/ERC721.sol";
 import "./interfaces/ERC721TokenReceiver.sol";
 import "./utils/Address.sol";
+${imports}
 
 /**
 * @title ERC721
 * @dev The contract implements ERC721 standard (see https://eips.ethereum.org/EIPS/eip-721).
 */
-contract ERC721Base is ERC721, ERC165Base {
+contract ERC721Base is ERC721, ERC165Base ${extensions} {
   using Address for address;
 
   /**
@@ -92,6 +102,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   view
+  ${modify(data, "balanceOf")}
   returns (uint256)
   {
     return _balanceOf(owner);
@@ -123,6 +134,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   view
+  ${modify(data, "ownerOf")}
   returns (address)
   {
     return _ownerOf(tokenID);
@@ -159,6 +171,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   payable
+  ${pause}
   {
     _approve(to, tokenID);
   }
@@ -192,6 +205,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   view
+  ${modify(data, "getApproved")}
   returns (address)
   {
     return _getApproved(tokenID);
@@ -224,6 +238,8 @@ contract ERC721Base is ERC721, ERC165Base {
     bool approved
   )
   external
+  ${modify(data, "setApprovalForAll")}
+  ${pause}
   {
     _setApprovalForAll(to, approved);
   }
@@ -256,6 +272,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   view
+  ${modify(data, "isApprovedForAll")}
   returns (bool)
   {
     return _isApprovedForAll(owner, operator);
@@ -292,6 +309,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   payable
+  ${pause}
   {
     _transferFrom(from, to, tokenID);
   }
@@ -337,6 +355,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   payable
+  ${pause}
   {
     _safeTransferFrom(from, to, tokenID, "");
   }
@@ -356,6 +375,7 @@ contract ERC721Base is ERC721, ERC165Base {
   )
   external
   payable
+  ${pause}
   {
     _safeTransferFrom(from, to, tokenID, data);
   }

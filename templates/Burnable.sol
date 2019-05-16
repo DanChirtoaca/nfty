@@ -77,5 +77,4 @@ contract Burnable is Administered {
     }
     return false;
   }
-
 }
