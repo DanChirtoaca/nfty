@@ -2,8 +2,18 @@
   from dsl_util import put, modify
 %>
 <%
-
   pause = put(data, 'pausable')
+  fields = data["fields"]
+  type_name_fields = []
+  name_fields = []
+  for type, name in fields.items():
+    type_name_fields += type + " " + name
+    name_fields += name
+  
+  struct_fields = ";\n".join(type_name_fields) + ";"
+  setter_fields = ",\n".join(type_name_fields)
+  constructor_vars = ", ".join(name_fields)
+  return_vars = ", ".join(("tokenData." + name) for name in name_fields)
 %>
 pragma solidity >=0.5.6;
 
@@ -16,7 +26,7 @@ import "./ERC721Base.sol";
 contract ERC721Extended is ERC721Base {
   struct TokenData
   {
-    ${token_struct_data}
+    ${struct_fields}
   }
 
   /**
@@ -38,13 +48,13 @@ contract ERC721Extended is ERC721Base {
   function setTokenData
   (
     uint256 tokenID,
-    ${token_setter_data}
+    ${setter_fields}
   )
   external
   ${modify(data, "setTokenData")}
   ${pause}
   {
-  TokenData memory tokenData = TokenData(${token_constructor_data}); // use provided arguments of the struct
+  TokenData memory tokenData = TokenData(${constructor_vars});
     _setTokenData(tokenID, tokenData);
   }
 
@@ -65,7 +75,7 @@ contract ERC721Extended is ERC721Base {
     require(_hasTokenData[tokenID], "Token has no token data.");
 
     TokenData memory tokenData = _tokenData[tokenID];
-    return (0, true); // should return a tuple containing the fields of the struct
+    return (${return_vars});
   }
 
   /**
