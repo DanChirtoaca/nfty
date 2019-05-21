@@ -34,11 +34,19 @@ Meta:
 ;
 
 Field:
-    type=SolidityType var_name=ID
+    type=SolidityType name=ID
 ;
 
 SolidityType:
-    'uint' | 'uint256' | 'address' | 'bool' | 'string'
+    Int | 'address' | 'bool' | 'string' | 'hash'
+;
+
+Int[noskipws]:
+   /\s*/ name=IntKey (size=INT)?
+;
+
+IntKey:
+    'uint' | 'int'
 ;
 
 Comment:
