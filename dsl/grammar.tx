@@ -1,20 +1,8 @@
 Contract:
-    (derives=Derive)?
-    (inlcudes=Include)?
-    (extends=Extend)?
+    ('derive' derived+=ID[','])?
+    ('include' included+=Feature[','])?
+    ('extend' 'with' fields+=Field[','])?
     modifiers*=Modifier
-;
-
-Derive:
-    'derive' derived+=ID[',']
-;
-
-Include:
-    'include' included+=Feature[',']
-;
-
-Extend:
-    'extend' 'with' fields+=Field[',']
 ;
 
 Modifier:
@@ -22,7 +10,7 @@ Modifier:
 ;
 
 Feature:
-    Meta | Mint | ID
+    meta=Meta | mint=Mint | name=ID
 ;
 
 Mint:
@@ -38,7 +26,7 @@ Field:
 ;
 
 SolidityType:
-    Int | 'address' | 'bool' | 'string' | 'hash'
+    int=Int | 'address' | 'bool' | 'string' | 'hash' | 'byte'
 ;
 
 Int[noskipws]:
