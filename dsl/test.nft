@@ -1,3 +1,3 @@
-derive owner, pause
+derive pause
 include mint, meta, enum
-extend with uint256 owner, bool interested
+extend with uint253 owner, bool interested

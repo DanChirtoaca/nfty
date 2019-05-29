@@ -9,8 +9,8 @@ print (nft_model)
 
 """
 1. parse and adjust AST
-2. build data objects
-3. create final structure
+2. create final structure
+3. build data objects
 4. fill templates
 
 """
