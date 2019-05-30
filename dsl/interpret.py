@@ -108,6 +108,14 @@ include_dict = {
       "dependencies" : [],
       "used" : False,
       "template" : False  
+  },
+  "core" : {
+      "name" : "Core",
+      "file" : "Core.sol",
+      "interface" : "",
+      "dependencies" : [],
+      "used" : True,
+      "template" : True 
   }
 }
 
@@ -143,7 +151,8 @@ template_data_dict = {
   "base_imports" : [],
   "base_extensions" : [],
   "core_imports" : [],
-  "core_extensions" : []
+  "core_extensions" : [],
+  "fields" : {}
 }
 
 def parse(contract):
@@ -213,40 +222,49 @@ def create_template_data(contract):
   # extract derive arguments
   _extract_derived()
   # extract include arguments
-  _extract_included()
+  _extract_included(included=contract.included)
   # extract extend arguments
   _extract_extended(fields=contract.fields)
   # extract modify arguments
   _extract_modifiers(modifiers=contract.modifiers)
 
-  def _extract_derived():
-    for key, elem in derive_dict.items():
-      if elem["used"]:
-        template_data_dict["base_imports"].append(elem["file"])
-        template_data_dict["base_extensions"].append(elem["name"]) 
-        if key == "pause": template_data_dict["pause"] = "whenNotPaused"
+def _extract_derived():
+  for key, elem in derive_dict.items():
+    if elem["used"]:
+      template_data_dict["base_imports"].append(elem["file"])
+      template_data_dict["base_extensions"].append(elem["name"]) 
+      if key == "pause": template_data_dict["pause"] = "whenNotPaused"
 
-  def _extract_included():
-    for key, elem in include_dict.items():
-
-
-
-
+def _extract_included(included):
+  if included:
+    for elem in included:
       if elem.mint and elem.mint.limit:
-        template_data_dict["base_imports"].append(structure_dict[elem]["file"])
-        template_data_dict["base_extensions"].append(structure_dict[elem]["name"]) 
+        params = "(" + str(elem.mint.limit) + ")"
+        template_data_dict["core_imports"].append(include_dict["limit"]["file"])
+        template_data_dict["core_extensions"].append(include_dict["limit"]["name"] + params)        
+      else:  
+        template_data_dict["core_imports"].append(include_dict[elem.name]["file"])
+        params = ""
+        if elem.meta:
+          params = '("{0}", "{1}")'.format(elem.meta.token_name, elem.meta.token_symbol)
 
-  def _extract_extended(fields):
-    for field in fields:
-      template_data_dict[field.name] = field.type
+        template_data_dict["core_extensions"].append(include_dict[elem.name]["name"] + params)   
+        
+  else:
+    template_data_dict["core_imports"].append(include_dict["base"]["file"])
+    template_data_dict["core_extensions"].append(include_dict["base"]["name"])  
 
-  def _extract_modifiers(modifiers):
-    for modifier in modifiers:
-      template_data_dict[modifier.function] = modifier.modifier
+def _extract_extended(fields):
+  for field in fields:
+    template_data_dict["fields"][field.name] = str(field.type)
+
+def _extract_modifiers(modifiers):
+  for modifier in modifiers:
+    template_data_dict[modifier.function] = modifier.modifier
 
 
 meta_model = metamodel_from_file('grammar.tx')
-contract = meta_model.model_from_file('test.nft')
+contract = meta_model.model_from_file('model.nft')
 
 parse(contract) ## checks the AST and adjusts its data if needed
 create_structure()  ## creates the final contracts structure with only the used templates
@@ -254,7 +272,7 @@ create_template_data(contract)  ## goes through the AST and extracts the data ne
 
 for elem, val in include_dict.items():  ## write data to templates
   if val["template"]:
-    filename = val["file"]
+    filename = "contracts/" + val["file"]
     template = Template(filename=filename)
     rendered = template.render(data=template_data_dict)
     f = open(filename, "w")
