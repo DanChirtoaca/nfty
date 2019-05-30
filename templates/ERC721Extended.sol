@@ -2,11 +2,11 @@
   from dsl_util import put, modify
 %>
 <%
-  pause = put(data, 'pausable')
+  pause = put(data, 'pause')
   fields = data["fields"]
   type_name_fields = []
   name_fields = []
-  for type, name in fields.items():
+  for name, type in fields.items():
     type_name_fields += type + " " + name
     name_fields += name
   

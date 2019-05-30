@@ -1,10 +1,11 @@
 <%!
-  from dsl_util import put, modify, getImports, getExtensions    
+  from dsl_util import put, modify, get_imports, get_extensions    
 %>
 <%
-  imports = getImports(data)
-  extensions = ", " + getExtenstions(data)
-  pause = put(data, 'pausable')
+  imports = get_imports(data, "base_imports")
+  extensions = get_extensions(data, "base_extensions")
+  if extensions: extensions = ", " + extensions
+  pause = put(data, 'pause')
 %>
 
 pragma solidity >=0.5.6;

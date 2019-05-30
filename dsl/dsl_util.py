@@ -5,20 +5,19 @@ def put(data, variable):
 
 def modify(data, function):
   modif = put(data, function)
-  if modif:
-    if modif == "onlyTokenOwner" or modif == "onlyTokenOwnerOrApproved":
+  if modif == "onlyTokenOwner" or modif == "onlyTokenOwnerOrApproved":
       modif += "(tokenID)"  
   return modif
 
-def getImports(data):
-  files = put(data, 'imports')
+def get_imports(data, category):
+  files = put(data, category)
   imports = ""
   if files:
-    imports = "".join(str("import " + '"' + file + '"' + ";\n") for file in files)
+    imports = "".join(str("import " + '"./' + file + '"' + ";\n") for file in files)
   return imports
 
-def getExtensions(data):
-  contracts = put(data, 'extensions')
+def get_extensions(data, category):
+  contracts = put(data, category)
   extensions = ""
   if contracts:
     extensions = ", ".join(contracts)

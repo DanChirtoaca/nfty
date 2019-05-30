@@ -1,9 +1,9 @@
 <%!
-  from dsl_util import put, modify, getImports, getExtensions
+  from dsl_util import get_imports, get_extensions 
 %>
 <%
-  imports = getImports(data)
-  extensions = getExtensions(data)
+  imports = get_imports(data, "core_imports")
+  extensions = get_extensions(data, "core_extensions")
 %>
 pragma solidity >=0.5.6;
 

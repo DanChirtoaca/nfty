@@ -2,7 +2,7 @@
   from dsl_util import put, modify
 %>
 <%
-  pause = put(data, 'pausable')
+  pause = put(data, 'pause')
 %>
 pragma solidity >=0.5.6;
 

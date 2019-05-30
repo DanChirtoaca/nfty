@@ -2,16 +2,16 @@ from textx import metamodel_from_file
 
 meta_model = metamodel_from_file('grammar.tx')
 
-nft_model = meta_model.model_from_file('model.nft')
+contract = meta_model.model_from_file('test.nft')
 
-print (nft_model)
+print ("")
 
 
 """
-1. parse and adjust AST
-2. create final structure
-3. build data objects
-4. fill templates
+1. parse and adjust AST - partly
+2. create final structure - done
+3. build data objects - partly
+4. fill templates - done
 
 """
 
