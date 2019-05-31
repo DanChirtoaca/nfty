@@ -193,13 +193,14 @@ def _parse_extended(fields):
         if int_field.size % 8 != 0:
           raise Exception("Size of '{0}' should be a multiple of 8. The value was: {1}".format(int_field.name, int_field.size))
       
-      elem.type = elem_type
+      elem.type.name = elem_type
 
     # ensure field names do not repeat
 
 def _parse_modifiers(contract):
-  for elem in contract.modifiers:
-    print(elem) # ensure correspondence function to derives and inclusions, and no double declarations
+  #for elem in contract.modifiers:
+  # ensure correspondence function to derives and inclusions, and no double declarations
+  pass
 
 def _set_used_recursive(feature, structure_dict):
   for elem in structure_dict[feature]["dependencies"]:
@@ -256,7 +257,7 @@ def _extract_included(included):
 
 def _extract_extended(fields):
   for field in fields:
-    template_data_dict["fields"][field.name] = str(field.type)
+    template_data_dict["fields"][field.name] = field.type.name
 
 def _extract_modifiers(modifiers):
   for modifier in modifiers:

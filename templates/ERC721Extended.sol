@@ -7,9 +7,9 @@
   type_name_fields = []
   name_fields = []
   for name, type in fields.items():
-    type_name_fields += type + " " + name
-    name_fields += name
-  
+    type_name_fields.append(type + " " + name)
+    name_fields.append(name)
+
   struct_fields = ";\n".join(type_name_fields) + ";"
   setter_fields = ",\n".join(type_name_fields)
   constructor_vars = ", ".join(name_fields)
@@ -55,7 +55,7 @@ contract ERC721Extended is ERC721Base {
   ${pause}
   {
   TokenData memory tokenData = TokenData(${constructor_vars});
-    _setTokenData(tokenID, tokenData);
+  _setTokenData(tokenID, tokenData);
   }
 
   /**

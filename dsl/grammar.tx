@@ -26,17 +26,21 @@ Field:
 ;
 
 SolidityType:
-    int=Int | 'address' | 'bool' | 'string' | 'hash' | 'byte'
+    int=IntType | name=SimpleType
 ;
 
-Int[noskipws]:
-   /\s*/ name=IntKey (size=INT)?
+IntType[noskipws]:
+    /\s*/ key=IntKey (size=INT)?
 ;
 
 IntKey:
     'uint' | 'int'
 ;
 
+SimpleType:
+    'address' | 'bool' | 'string' | 'hash' | 'byte'
+;
+
 Comment:
-  /\/\/.*$/
+    /\/\/.*$/
 ;
