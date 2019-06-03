@@ -1,3 +1,3 @@
-derive pause
-include mint, meta, enum
-extend with uint253 owner, bool interested
+
+include mint ("string", 200), enum
+extend with address home, bool2 is, uint244 location

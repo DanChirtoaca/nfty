@@ -21,9 +21,9 @@ include meta ('Tokies', 'TK'), enum, mint(2000), burn, auction // allows to add 
                                                                // auction - auctioning extension - allows to create auctions for owned tokens and 
                                                                // sell them by accepting bids
 
-extend with address seller, bool active // allows to extend the contract with additional token data
-                                        // the fields are added to a struct, which gets mapped to the corresponding token ID
-                                        // only basic types are supported (i.e. no mappings or arrays)
+extend with address seller, bool active, uint128 duration // allows to extend the contract with additional token data
+                                                          // the fields are added to a struct, which gets mapped to the corresponding token ID
+                                                          // only basic types are supported (i.e. no mappings or arrays)
 
 modify transferTo with onlyContractOwner // allows to modify an external or public function with one of the available modifiers
 modify balanceOf with onlyTokenOwner     // modifiers: onlyContractOwner, onlyTokenOwner, onlyTokenOwnerOrApproved, onlyAdmin, onlyMinter, onlyBurner

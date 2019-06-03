@@ -7,30 +7,35 @@ derive_dict = {
   "owner" : {
         "name" : "Ownable",
         "file" : "Ownable.sol",
+        "interface" : "",
         "dependencies" : [],
         "used" : False,  
     },
     "admin" : {
         "name" : "Administered",
         "file" : "Administered.sol",
+        "interface" : "",
         "dependencies" : ["owner"],
         "used" : False,
     },
     "minter" : {
         "name" : "Mintable",
         "file" : "Mintable.sol",
+        "interface" : "",
         "dependencies" : ["admin"],
         "used" : False, 
     },
     "burner" : {
         "name" : "Burnable",
         "file" : "Burnable.sol",        
+        "interface" : "",
         "dependencies" : ["admin"],
         "used" : False,
     },
     "pause" : {
         "name" : "Pausable",
         "file" : "Pausable.sol",
+        "interface" : "",
         "dependencies" : [],
         "used" : False,
     }
@@ -185,7 +190,7 @@ def _parse_extended(fields):
     # ensure uint_ is used with proper size
     if elem.type.int:
       int_field = elem.type.int
-      elem_type = int_field.name 
+      elem_type = int_field.key 
       if int_field.size:
         elem_type += str(int_field.size)
         if int_field.size < 8 or int_field.size > 256: 
@@ -267,7 +272,8 @@ def _extract_modifiers(modifiers):
 meta_model = metamodel_from_file('grammar.tx')
 contract = meta_model.model_from_file('model.nft')
 
-parse(contract) ## checks the AST and adjusts its data if needed
+if contract:
+  parse(contract) ## checks the AST and adjusts its data if needed
 create_structure()  ## creates the final contracts structure with only the used templates
 create_template_data(contract)  ## goes through the AST and extracts the data needed for the templates
 

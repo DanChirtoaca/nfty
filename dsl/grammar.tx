@@ -10,35 +10,23 @@ Modifier:
 ;
 
 Feature:
-    meta=Meta | mint=Mint | name=ID
+    name=ID ('(' params+=Parameter[','] ')')?
 ;
 
-Mint:
-    'mint' ( '(' limit=INT ')' )?
-;
-
-Meta:
-    'meta' ( '(' token_name=STRING ',' token_symbol=STRING ')' )?
+Parameter:
+    STRING | INT
 ;
 
 Field:
     type=SolidityType name=ID
 ;
 
-SolidityType:
-    int=IntType | name=SimpleType
+SolidityType[noskipws]:
+    /\s*/ name=Type (size=INT)?
 ;
 
-IntType[noskipws]:
-    /\s*/ key=IntKey (size=INT)?
-;
-
-IntKey:
-    'uint' | 'int'
-;
-
-SimpleType:
-    'address' | 'bool' | 'string' | 'hash' | 'byte'
+Type:
+    'uint' | 'int' | 'address' | 'bool' | 'string' | 'hash' | 'byte'
 ;
 
 Comment:

@@ -4,7 +4,7 @@ meta_model = metamodel_from_file('grammar.tx')
 
 contract = meta_model.model_from_file('test.nft')
 
-print ("")
+print (contract.fields[0].type.size)
 
 
 """
