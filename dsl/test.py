@@ -10,7 +10,7 @@ print (contract.fields[0].type.size)
 """
 1. parse and adjust AST - partly
 2. create final structure - done
-3. build data objects - partly
+3. build data objects - done
 4. fill templates - done
 
 """

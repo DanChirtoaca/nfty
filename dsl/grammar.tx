@@ -5,10 +5,6 @@ Contract:
     modifiers*=Modifier
 ;
 
-Modifier:
-    'modify' function=ID 'with' modifier=ID
-;
-
 Feature:
     name=ID ('(' params+=Parameter[','] ')')?
 ;
@@ -18,15 +14,19 @@ Parameter:
 ;
 
 Field:
-    type=SolidityType name=ID
+    type=Type name=ID
 ;
 
-SolidityType[noskipws]:
-    /\s*/ name=Type (size=INT)?
+Type[noskipws]:
+    /\s*/ name=SolidityType (size=INT)?
 ;
 
-Type:
+SolidityType:
     'uint' | 'int' | 'address' | 'bool' | 'string' | 'hash' | 'byte'
+;
+
+Modifier:
+    'modify' function=ID 'with' modifier=ID
 ;
 
 Comment:

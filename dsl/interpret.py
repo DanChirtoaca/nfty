@@ -177,38 +177,40 @@ def _parse_derived(derived):
  
 def _parse_included(included):
   for elem in included:
-    if elem.mint: 
-      elem.name = "mint"  # add check > 0 if mint has limit
-      if elem.mint.limit:
-        _set_used_recursive("limit", include_dict)
-    if elem.meta: elem.name = "meta"
-    _set_used_recursive(elem.name, include_dict)
+    if elem.name == "mint" and elem.params:
+      # check validity of parameters
+      limit = elem.params[0]
+      if not limit > 0 :
+        raise Exception("Limit of tokens for minting should be > 0 (greater than). The value was: {}".format(limit))
+      
+      _set_used_recursive("limit", include_dict)
+    
+    if elem.name == "meta":
+      # check validity of parameters
+      pass
+    
+    _set_used_recursive(elem.name, include_dict)  # every elem should be set as used
 
 def _parse_extended(fields):
   if fields: _set_used_recursive("extend", include_dict)
   for elem in fields:
-    # ensure uint_ is used with proper size
-    if elem.type.int:
-      int_field = elem.type.int
-      elem_type = int_field.key 
-      if int_field.size:
-        elem_type += str(int_field.size)
-        if int_field.size < 8 or int_field.size > 256: 
-          raise Exception("Size of '{0}' should be at least 8 and at most 256. The value was: {1}".format(int_field.name, int_field.size))
-        if int_field.size % 8 != 0:
-          raise Exception("Size of '{0}' should be a multiple of 8. The value was: {1}".format(int_field.name, int_field.size))
-      
-      elem.type.name = elem_type
+    if (elem.type.name == "int" or elem.type.name == "uint") and elem.type.size > 0:
+      if elem.type.size < 8 or elem.type.size > 256: 
+        raise Exception("Size of '{0}' should be at least 8 and at most 256. The value was: {1}".format(elem.type.name, elem.type.size))
+      if elem.type.size % 8 != 0:
+        raise Exception("Size of '{0}' should be a multiple of 8. The value was: {1}".format(elem.type.name, elem.type.size))
+    
+      elem.type.name += str(elem.type.size) 
 
     # ensure field names do not repeat
 
 def _parse_modifiers(contract):
-  #for elem in contract.modifiers:
-  # ensure correspondence function to derives and inclusions, and no double declarations
-  pass
+  for elem in contract.modifiers:
+    # ensure correspondence function to derives and inclusions, and no double declarations
+    pass
 
 def _set_used_recursive(feature, structure_dict):
-  for elem in structure_dict[feature]["dependencies"]:
+  for elem in structure_dict[feature]["dependencies"]: # stop recursive calls when file is already set as used
     _set_used_recursive(elem, structure_dict)
   structure_dict[feature]["used"] = True    
 
@@ -242,21 +244,20 @@ def _extract_derived():
       if key == "pause": template_data_dict["pause"] = "whenNotPaused"
 
 def _extract_included(included):
-  if included:
-    for elem in included:
-      if elem.mint and elem.mint.limit:
-        params = "(" + str(elem.mint.limit) + ")"
-        template_data_dict["core_imports"].append(include_dict["limit"]["file"])
-        template_data_dict["core_extensions"].append(include_dict["limit"]["name"] + params)        
-      else:  
-        template_data_dict["core_imports"].append(include_dict[elem.name]["file"])
-        params = ""
-        if elem.meta:
-          params = '("{0}", "{1}")'.format(elem.meta.token_name, elem.meta.token_symbol)
+  for elem in included:
+    if elem.name == "mint" and elem.params:
+      params = "(" + str(elem.params[0]) + ")"
+      template_data_dict["core_imports"].append(include_dict["limit"]["file"])
+      template_data_dict["core_extensions"].append(include_dict["limit"]["name"] + params)        
+    else:  
+      template_data_dict["core_imports"].append(include_dict[elem.name]["file"])
+      params = ""
+      if elem.name == "meta":
+        params = '("{0}", "{1}")'.format(elem.params[0], elem.params[1])
 
-        template_data_dict["core_extensions"].append(include_dict[elem.name]["name"] + params)   
-        
-  else:
+      template_data_dict["core_extensions"].append(include_dict[elem.name]["name"] + params)   
+      
+  if not included:
     template_data_dict["core_imports"].append(include_dict["base"]["file"])
     template_data_dict["core_extensions"].append(include_dict["base"]["name"])  
 
@@ -268,20 +269,34 @@ def _extract_modifiers(modifiers):
   for modifier in modifiers:
     template_data_dict[modifier.function] = modifier.modifier
 
+def write_templates():
+  for elem, val in include_dict.items():  
+    if val["template"]:
+      filename = "contracts/" + val["file"]
+      template = Template(filename=filename)
+      rendered = template.render(data=template_data_dict)
+      f = open(filename, "w")
+      f.write(rendered)
+      f.close()
+
 
 meta_model = metamodel_from_file('grammar.tx')
 contract = meta_model.model_from_file('model.nft')
 
-if contract:
-  parse(contract) ## checks the AST and adjusts its data if needed
-create_structure()  ## creates the final contracts structure with only the used templates
+parse(contract)                 ## checks the AST and adjusts its data if needed
+create_structure()              ## creates the final contracts structure with only the used templates
 create_template_data(contract)  ## goes through the AST and extracts the data needed for the templates
+write_templates()               ## write data to templates
 
-for elem, val in include_dict.items():  ## write data to templates
-  if val["template"]:
-    filename = "contracts/" + val["file"]
-    template = Template(filename=filename)
-    rendered = template.render(data=template_data_dict)
-    f = open(filename, "w")
-    f.write(rendered)
-    f.close()
+# TODO:
+# 1. check validity of elements and sort (necessary for proper linearization)
+# 2. check validity of parameters
+# 3. ensure sized types are used correctly
+# 4. ensure field names are unique
+# 5. ensure correspondence of function to derives and inclusions, and no double declarations
+# 6. stop recursive calls when file is already set as used
+# 7. improve data structures
+# 8. fix empty file as input
+# 9. input file as arg
+#10. auto delete contracts folder if it exists already
+#11. improve overall structure
