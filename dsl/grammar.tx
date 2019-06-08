@@ -22,7 +22,7 @@ Type[noskipws]:
 ;
 
 SolidityType:
-    'uint' | 'int' | 'address' | 'bool' | 'string' | 'hash' | 'byte'
+    'uint' | 'int' | 'address' | 'bool' | 'string' | 'hash' | 'bytes'
 ;
 
 Modifier:

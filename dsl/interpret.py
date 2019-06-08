@@ -10,35 +10,35 @@ derive_dict = {
         "interface" : "",
         "dependencies" : [],
         "used" : False,  
-    },
-    "admin" : {
-        "name" : "Administered",
-        "file" : "Administered.sol",
-        "interface" : "",
-        "dependencies" : ["owner"],
-        "used" : False,
-    },
-    "minter" : {
-        "name" : "Mintable",
-        "file" : "Mintable.sol",
-        "interface" : "",
-        "dependencies" : ["admin"],
-        "used" : False, 
-    },
-    "burner" : {
-        "name" : "Burnable",
-        "file" : "Burnable.sol",        
-        "interface" : "",
-        "dependencies" : ["admin"],
-        "used" : False,
-    },
-    "pause" : {
-        "name" : "Pausable",
-        "file" : "Pausable.sol",
-        "interface" : "",
-        "dependencies" : [],
-        "used" : False,
-    }
+  },
+  "admin" : {
+      "name" : "Administered",
+      "file" : "Administered.sol",
+      "interface" : "",
+      "dependencies" : ["owner"],
+      "used" : False,
+  },
+  "minter" : {
+      "name" : "Mintable",
+      "file" : "Mintable.sol",
+      "interface" : "",
+      "dependencies" : ["admin"],
+      "used" : False, 
+  },
+  "burner" : {
+      "name" : "Burnable",
+      "file" : "Burnable.sol",        
+      "interface" : "",
+      "dependencies" : ["admin"],
+      "used" : False,
+  },
+  "pause" : {
+      "name" : "Pausable",
+      "file" : "Pausable.sol",
+      "interface" : "",
+      "dependencies" : [],
+      "used" : False,
+  }
 }
 
 include_dict = {
@@ -48,7 +48,8 @@ include_dict = {
       "interface" : "ERC721.sol",
       "dependencies" : [],
       "used" : True,
-      "template" : True  
+      "template" : True,  
+      "public" : False
   },
   "meta" : {
       "name" : "ERC721BaseMetadata",
@@ -56,7 +57,8 @@ include_dict = {
       "interface" : "ERC721Metadata.sol",
       "dependencies" : [],
       "used" : False,
-      "template" : True  
+      "template" : True,
+      "public" : True  
   },
   "enum" : {
       "name" : "ERC721BaseEnumerable",
@@ -64,7 +66,8 @@ include_dict = {
       "interface" : "ERC721Enumerable.sol",
       "dependencies" : ["supply"],
       "used" : False,
-      "template" : True  
+      "template" : True,
+      "public" : True  
   },
   "mint" : {
       "name" : "ERC721BaseMintable",
@@ -72,7 +75,8 @@ include_dict = {
       "interface" : "ERC721Mintable.sol",
       "dependencies" : [],
       "used" : False,
-      "template" : True  
+      "template" : True,
+      "public" : True  
   },
   "burn" : {
       "name" : "ERC721BaseBurnable",
@@ -80,7 +84,8 @@ include_dict = {
       "interface" : "ERC721Burnable.sol",
       "dependencies" : [],
       "used" : False,
-      "template" : True  
+      "template" : True,
+      "public" : True    
   },
   "auction" : {
       "name" : "ERC721BaseBuyable",
@@ -88,7 +93,8 @@ include_dict = {
       "interface" : "",
       "dependencies" : [],
       "used" : False,
-      "template" : True  
+      "template" : True,
+      "public" : True  
   },
   "extend" : {
       "name" : "ERC721Extended",
@@ -96,7 +102,8 @@ include_dict = {
       "interface" : "",
       "dependencies" : [],
       "used" : False,
-      "template" : True  
+      "template" : True,
+      "public" : False    
   },
   "limit" : {
       "name" : "ERC721BaseMintableLimited",
@@ -104,7 +111,8 @@ include_dict = {
       "interface" : "",
       "dependencies" : ["mint", "supply"],
       "used" : False,
-      "template" : False  
+      "template" : False,
+      "public" : False   
   },
   "supply" : {
       "name" : "ERC721BaseTokenSupply",
@@ -112,7 +120,8 @@ include_dict = {
       "interface" : "",
       "dependencies" : [],
       "used" : False,
-      "template" : False  
+      "template" : False,
+      "public" : False    
   },
   "core" : {
       "name" : "Core",
@@ -120,7 +129,8 @@ include_dict = {
       "interface" : "",
       "dependencies" : [],
       "used" : True,
-      "template" : True 
+      "template" : True,
+      "public" : False   
   }
 }
 
@@ -171,38 +181,61 @@ def parse(contract):
   _parse_modifiers(contract)
 
 def _parse_derived(derived):
-  # TODO: check validity of elements and sort (necessary for proper linearization)
   for elem in derived:
-    _set_used_recursive(elem, derive_dict)
+    if elem in derive_dict:
+      _set_used_recursive(elem, derive_dict)
+    else:
+      raise Exception("Unkown '{}' identifier for 'derive'.".format(elem))
  
 def _parse_included(included):
   for elem in included:
     if elem.name == "mint" and elem.params:
-      # check validity of parameters
+      if not len(elem.params) == 1:
+        raise Exception("Too many arguments for 'mint'. Expected 1 argument, received: {} arguments.".format(len(elem.params)))
       limit = elem.params[0]
+      if not isinstance(limit, int):
+        raise Exception("Wrong argument type for 'mint'. Expected class 'int', received: {}.".format(type(limit)))
       if not limit > 0 :
-        raise Exception("Limit of tokens for minting should be > 0 (greater than). The value was: {}".format(limit))
-      
+        raise Exception("Limit of tokens for minting should be > 0 (greater than). The value was: {}.".format(limit))
+
       _set_used_recursive("limit", include_dict)
     
     if elem.name == "meta":
-      # check validity of parameters
-      pass
+      if elem.params:
+        if not len(elem.params) == 2:
+          raise Exception("Wrong number of arguments for 'meta'. Expected 2 arguments, received: {} argument(s).".format(len(elem.params)))
+        if not (isinstance(elem.params[0], str) and isinstance(elem.params[1], str)):
+          raise Exception("Wrong argument(s) type(s) for 'meta'. Expected class 'str', class 'str', received: {0}, {1}.".format(type(elem.params[0]), type(elem.params[1])))
+      else:
+        elem.params.append("")
+        elem.params.append("")
     
-    _set_used_recursive(elem.name, include_dict)  # every elem should be set as used
+    if elem.name in include_dict and include_dict[elem.name]["public"]:
+      _set_used_recursive(elem.name, include_dict)
+    else:
+      raise Exception("Unkown '{}' identifier for 'include'.".format(elem.name))
 
 def _parse_extended(fields):
   if fields: _set_used_recursive("extend", include_dict)
+  field_names = set()
   for elem in fields:
+    if elem.name in field_names:
+      raise Exception("Field identifiers must be unique. Double declaration for '{}'.".format(elem.name))
+    else:
+      field_names.add(elem.name)
+
     if (elem.type.name == "int" or elem.type.name == "uint") and elem.type.size > 0:
       if elem.type.size < 8 or elem.type.size > 256: 
-        raise Exception("Size of '{0}' should be at least 8 and at most 256. The value was: {1}".format(elem.type.name, elem.type.size))
+        raise Exception("Size of '{0}' should be at least 8 and at most 256. The value was: {1}.".format(elem.type.name, elem.type.size))
       if elem.type.size % 8 != 0:
-        raise Exception("Size of '{0}' should be a multiple of 8. The value was: {1}".format(elem.type.name, elem.type.size))
-    
+        raise Exception("Size of '{0}' should be a multiple of 8. The value was: {1}.".format(elem.type.name, elem.type.size))
       elem.type.name += str(elem.type.size) 
-
-    # ensure field names do not repeat
+    if elem.type.name == "bytes":
+      if elem.type.size > 32 or elem.type.size < 1: 
+        raise Exception("Size of '{0}' should be at least 1 and at most 32. The value was: {1} or not provided.".format(elem.type.name, elem.type.size))
+      elem.type.name += str(elem.type.size)
+    if elem.type.size < 0:
+      raise Exception("Size of '{}' cannot be negative.".format(elem.type.name))
 
 def _parse_modifiers(contract):
   for elem in contract.modifiers:
@@ -210,8 +243,9 @@ def _parse_modifiers(contract):
     pass
 
 def _set_used_recursive(feature, structure_dict):
-  for elem in structure_dict[feature]["dependencies"]: # stop recursive calls when file is already set as used
-    _set_used_recursive(elem, structure_dict)
+  for elem in structure_dict[feature]["dependencies"]: 
+    if not structure_dict[elem]["used"]:
+      _set_used_recursive(elem, structure_dict)
   structure_dict[feature]["used"] = True    
 
 def create_structure():
@@ -271,7 +305,7 @@ def _extract_modifiers(modifiers):
 
 def write_templates():
   for elem, val in include_dict.items():  
-    if val["template"]:
+    if val["template"] and val["used"]:
       filename = "contracts/" + val["file"]
       template = Template(filename=filename)
       rendered = template.render(data=template_data_dict)
@@ -281,7 +315,7 @@ def write_templates():
 
 
 meta_model = metamodel_from_file('grammar.tx')
-contract = meta_model.model_from_file('model.nft')
+contract = meta_model.model_from_file('test.nft')
 
 parse(contract)                 ## checks the AST and adjusts its data if needed
 create_structure()              ## creates the final contracts structure with only the used templates
@@ -289,12 +323,12 @@ create_template_data(contract)  ## goes through the AST and extracts the data ne
 write_templates()               ## write data to templates
 
 # TODO:
-# 1. check validity of elements and sort (necessary for proper linearization)
-# 2. check validity of parameters
-# 3. ensure sized types are used correctly
-# 4. ensure field names are unique
-# 5. ensure correspondence of function to derives and inclusions, and no double declarations
-# 6. stop recursive calls when file is already set as used
+# 1. check validity of elements and sort (necessary for proper linearization) -- done
+# 2. check validity of parameters -- done
+# 3. ensure sized types are used correctly -- done
+# 4. ensure field names are unique -- done
+# 5. ensure correspondence of function to derives and inclusions, and no double declarations !!!!!!!!!!!
+# 6. stop recursive calls when file is already set as used -- done
 # 7. improve data structures
 # 8. fix empty file as input
 # 9. input file as arg
