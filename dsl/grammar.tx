@@ -1,4 +1,5 @@
 Contract:
+    'contract'
     ('derive' derived+=ID[','])?
     ('include' included+=Feature[','])?
     ('extend' 'with' fields+=Field[','])?

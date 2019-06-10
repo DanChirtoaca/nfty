@@ -1,41 +1,38 @@
 from textx import metamodel_from_file
-from shutil import copytree, ignore_patterns
+from shutil import copytree, ignore_patterns, rmtree
 from mako.template import Template
 import os
+import sys
+from pathlib import Path
 
 derive_dict = {
   "owner" : {
         "name" : "Ownable",
         "file" : "Ownable.sol",
-        "interface" : "",
         "dependencies" : [],
         "used" : False,  
   },
   "admin" : {
       "name" : "Administered",
       "file" : "Administered.sol",
-      "interface" : "",
       "dependencies" : ["owner"],
       "used" : False,
   },
   "minter" : {
       "name" : "Mintable",
       "file" : "Mintable.sol",
-      "interface" : "",
       "dependencies" : ["admin"],
       "used" : False, 
   },
   "burner" : {
       "name" : "Burnable",
-      "file" : "Burnable.sol",        
-      "interface" : "",
+      "file" : "Burnable.sol",  
       "dependencies" : ["admin"],
       "used" : False,
   },
   "pause" : {
       "name" : "Pausable",
       "file" : "Pausable.sol",
-      "interface" : "",
       "dependencies" : [],
       "used" : False,
   }
@@ -238,9 +235,25 @@ def _parse_extended(fields):
       raise Exception("Size of '{}' cannot be negative.".format(elem.type.name))
 
 def _parse_modifiers(contract):
+  functions_modified = set()
   for elem in contract.modifiers:
-    # ensure correspondence function to derives and inclusions, and no double declarations
-    pass
+    if elem.function not in functions_dict:
+      raise Exception("Unknown '{}' function name.".format(elem.function))
+    if elem.modifier not in modifiers_dict:
+      raise Exception("Unknown '{}' modifier.".format(elem.modifier))
+    # check if function dependecy is added (used)
+    include_dep = functions_dict[elem.function]
+    if not include_dict[include_dep]["used"]:
+      raise Exception("Function '{0}' is not available and thus cannot be modified. Inclusion of '{1}' is missing.".format(elem.function, include_dep))
+    # check if function not already modified
+    if elem.function in functions_modified:
+      raise Exception("Function '{}' already has a modifier. Only one modifier per function is allowed.".format(elem.function))
+    # check if modifier is available - dependecy is met
+    modifier_dep = modifiers_dict[elem.modifier]
+    if modifier_dep != "base" and not derive_dict[modifier_dep]["used"]:
+      raise Exception("Modifier '{0}' is not available. Derivation of '{1}' is missing.".format(elem.modifier, modifier_dep))
+
+    functions_modified.add(elem.function)
 
 def _set_used_recursive(feature, structure_dict):
   for elem in structure_dict[feature]["dependencies"]: 
@@ -256,7 +269,7 @@ def _get_unused(structure_dict, unused = []):
   for elem in structure_dict.values():
     if not elem["used"]:
       unused.append(elem["file"])
-      if elem["interface"]: unused.append(elem["interface"]) 
+      if "interface" in elem and elem["interface"]: unused.append(elem["interface"]) 
 
   return unused
 
@@ -289,9 +302,8 @@ def _extract_included(included):
       if elem.name == "meta":
         params = '("{0}", "{1}")'.format(elem.params[0], elem.params[1])
 
-      template_data_dict["core_extensions"].append(include_dict[elem.name]["name"] + params)   
-      
-  if not included:
+      template_data_dict["core_extensions"].append(include_dict[elem.name]["name"] + params)         
+  else:
     template_data_dict["core_imports"].append(include_dict["base"]["file"])
     template_data_dict["core_extensions"].append(include_dict["base"]["name"])  
 
@@ -314,23 +326,28 @@ def write_templates():
       f.close()
 
 
-meta_model = metamodel_from_file('grammar.tx')
-contract = meta_model.model_from_file('test.nft')
+if len(sys.argv) != 2 :
+  raise Exception("Usage: interpret.py <inputfile>")
 
-parse(contract)                 ## checks the AST and adjusts its data if needed
-create_structure()              ## creates the final contracts structure with only the used templates
-create_template_data(contract)  ## goes through the AST and extracts the data needed for the templates
-write_templates()               ## write data to templates
+if Path('contracts').exists():
+  val = input("Destination '/contracts' already exists. Delete and proceed? : [y/n]")
+  if val == "y" or val == "Y":
+    rmtree("contracts")
+  else:
+    exit()
+
+meta_model = metamodel_from_file('grammar.tx')
+contract = meta_model.model_from_file(sys.argv[1])
+
+## checks the AST and adjusts its data if needed
+parse(contract)                
+## creates the final contracts structure with only the used templates
+create_structure()              
+## goes through the AST and extracts the data needed for the templates
+create_template_data(contract)  
+## write data to templates
+write_templates()              
 
 # TODO:
-# 1. check validity of elements and sort (necessary for proper linearization) -- done
-# 2. check validity of parameters -- done
-# 3. ensure sized types are used correctly -- done
-# 4. ensure field names are unique -- done
-# 5. ensure correspondence of function to derives and inclusions, and no double declarations !!!!!!!!!!!
-# 6. stop recursive calls when file is already set as used -- done
-# 7. improve data structures
-# 8. fix empty file as input
-# 9. input file as arg
-#10. auto delete contracts folder if it exists already
+#10. auto delete contracts folder if it exists already, but asks
 #11. improve overall structure
