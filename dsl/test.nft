@@ -1,13 +1,12 @@
+// this is a comment
+// every line of code in this dsl is optional -> 
+// the minimum possible program is an empty file ->
+// yielding only the base implementation of the ERC721 standard.
 contract
-derive owner, admin, minter, burner, pause
 
-include meta('Tokies', 'TK'), enum, mint(45000), burn, auction
 
-extend with address origin, uint64 age, uint32 route, bool ready 
 
-modify ownerOf with onlyContractOwner 
-modify balanceOf with onlyTokenOwner  
-modify mint with onlyMinter
-modify burn with onlyBurner 
-
+extend with address seller, bool active, uint128 duration // allows to extend the contract with additional token data
+                                                          // the fields are added to a struct, which gets mapped to the corresponding token ID
+                                                          // only basic types are supported (i.e. no mappings or arrays)
 

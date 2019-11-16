@@ -291,12 +291,15 @@ def _extract_derived():
       if key == "pause": template_data_dict["pause"] = "whenNotPaused"
 
 def _extract_included(included):
+  if include_dict["extend"]["used"]:
+    template_data_dict["core_imports"].append(include_dict["extend"]["file"])
+    template_data_dict["core_extensions"].append(include_dict["extend"]["name"])
   for elem in included:
     if elem.name == "mint" and elem.params:
       params = "(" + str(elem.params[0]) + ")"
       template_data_dict["core_imports"].append(include_dict["limit"]["file"])
       template_data_dict["core_extensions"].append(include_dict["limit"]["name"] + params)        
-    else:  
+    else:
       template_data_dict["core_imports"].append(include_dict[elem.name]["file"])
       params = ""
       if elem.name == "meta":
@@ -346,8 +349,4 @@ create_structure()
 ## goes through the AST and extracts the data needed for the templates
 create_template_data(contract)  
 ## write data to templates
-write_templates()              
-
-# TODO:
-#10. auto delete contracts folder if it exists already, but asks
-#11. improve overall structure
+write_templates()                
