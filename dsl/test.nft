@@ -1,1 +1,13 @@
 contract
+derive owner, admin, minter, burner, pause
+
+include meta('Tokies', 'TK'), enum, mint(45000), burn, auction
+
+extend with address origin, uint64 age, uint32 route, bool ready 
+
+modify ownerOf with onlyContractOwner 
+modify balanceOf with onlyTokenOwner  
+modify mint with onlyMinter
+modify burn with onlyBurner 
+
+

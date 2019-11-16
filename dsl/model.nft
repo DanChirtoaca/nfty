@@ -2,7 +2,7 @@
 // every line of code in this dsl is optional -> 
 // the minimum possible program is an empty file ->
 // yielding only the base implementation of the ERC721 standard.
-
+contract
 derive owner, admin, minter, burner, pause // allows to add one or more access control features (5 available)
                                            // these features are separated from the rest
                                            // as they are to be inherited by the base contract ERC721
@@ -25,7 +25,7 @@ extend with address seller, bool active, uint128 duration // allows to extend th
                                                           // the fields are added to a struct, which gets mapped to the corresponding token ID
                                                           // only basic types are supported (i.e. no mappings or arrays)
 
-modify transferTo with onlyContractOwner // allows to modify an external or public function with one of the available modifiers
+modify ownerOf with onlyContractOwner // allows to modify an external or public function with one of the available modifiers
 modify balanceOf with onlyTokenOwner     // modifiers: onlyContractOwner, onlyTokenOwner, onlyTokenOwnerOrApproved, onlyAdmin, onlyMinter, onlyBurner
                                          // the available modifiers depend on the derived acces control features (line 6)
                                          // a function can have at most one 'only' modifier 
