@@ -291,6 +291,9 @@ def _extract_derived():
       if key == "pause": template_data_dict["pause"] = "whenNotPaused"
 
 def _extract_included(included):
+  if include_dict["extend"]["used"]:
+    template_data_dict["core_imports"].append(include_dict["extend"]["file"])
+    template_data_dict["core_extensions"].append(include_dict["extend"]["name"])
   for elem in included:
     if elem.name == "mint" and elem.params:
       params = "(" + str(elem.params[0]) + ")"
@@ -303,13 +306,9 @@ def _extract_included(included):
         params = '("{0}", "{1}")'.format(elem.params[0], elem.params[1])
 
       template_data_dict["core_extensions"].append(include_dict[elem.name]["name"] + params)         
-  if not included: # if nothing is included then add the base ERC721
+  else:
     template_data_dict["core_imports"].append(include_dict["base"]["file"])
     template_data_dict["core_extensions"].append(include_dict["base"]["name"])  
-
-  if include_dict["extend"]["used"]:
-    template_data_dict["core_imports"].append(include_dict["extend"]["file"])
-    template_data_dict["core_extensions"].append(include_dict["extend"]["name"])
 
 def _extract_extended(fields):
   for field in fields:

@@ -1,4 +1,5 @@
 __pycache__
 pyan-master
-test.py
-test.nft
+test.py*
+test.nft*
+/contracts

@@ -6,13 +6,16 @@
   fields = data["fields"]
   type_name_fields = []
   name_fields = []
+  types = []
   for name, type in fields.items():
     type_name_fields.append(type + " " + name)
     name_fields.append(name)
+    types.append(type)
 
   struct_fields = ";\n".join(type_name_fields) + ";"
   setter_fields = ",\n".join(type_name_fields)
   constructor_vars = ", ".join(name_fields)
+  return_types = ", ".join(types)
   return_vars = ", ".join(("tokenData." + name) for name in name_fields)
 %>
 pragma solidity >=0.5.6;
@@ -69,7 +72,7 @@ contract ERC721Extended is ERC721Base {
   external
   view
   ${modify(data, "getTokenData")}
-  returns (uint256,bool)
+  returns (${return_types})
   {
     require(_tokenExists(tokenID), "Token does not exist.");
     require(_hasTokenData[tokenID], "Token has no token data.");
